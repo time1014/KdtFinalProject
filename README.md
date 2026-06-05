@@ -45,10 +45,10 @@
   </tr>
 
   <tr>
-    <td align="center">프로젝트 총괄 및 배포</td>
-    <td align="center">형상관리 및 Git 관리</td>
-    <td align="center">DB 설계 및 관리</td>
-    <td align="center">개발환경 구축 및 문서 관리</td>
-    <td align="center">기능 개발 및 테스트</td>
+    <td align="center">프로젝트 총괄</td>
+    <td align="center">배포</td>
+    <td align="center">DB</td>
+    <td align="center">개발환경</td>
+    <td align="center">Git</td>
   </tr>
 </table>
