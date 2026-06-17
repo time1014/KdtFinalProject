@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
-public class test {
+public class CommonController {
 
     @GetMapping("/")
     public String home() {
-        return "dashboard/index";
+        return "weple/common";
     }
 
     @GetMapping("/{page}.html")
@@ -17,3 +17,4 @@ public class test {
         return "dashboard/" + page;
     }
 }
+

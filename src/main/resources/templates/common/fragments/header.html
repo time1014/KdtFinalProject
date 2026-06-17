@@ -1,34 +1,26 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org/">
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
 <body>
-<div th:fragment="headerFragment" class="top_nav">
-  <div class="nav_menu">
-    <div class="nav toggle">
-      <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+<div th:fragment="headerFragment" class="nav_menu" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px 20px; box-sizing: border-box;">
+    
+    <h1 class="header-title-left" style="margin: 0;">프로젝트 1</h1>
+    
+    <div class="header-profile-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+        
+        <a href="#" style="color: #4d84ff; font-size: 16px; position: relative; text-decoration: none; display: flex; align-items: center;">
+            <i class="fa fa-bell"></i>
+            <span class="badge bg-red" style="position: absolute; top: -8px; right: -8px; font-size: 9px; padding: 2px 4px; background-color: red; color: white; border-radius: 50%;">6</span>
+        </a>
+        
+        <img th:src="@{/images/햄스터안경.jpg}" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+        
+        <span class="user-name" style="font-weight: bold; font-size: 14px;">김위플</span>
+        
+        <a href="#" style="color: #64748b; font-size: 16px; display: flex; align-items: center;"><i class="fa fa-sign-out"></i></a>
+        
     </div>
-    <nav class="nav navbar-nav">
-      <ul class=" navbar-right">
-        <li class="nav-item dropdown open" style="padding-left: 15px;">
-          <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-            <img src="/images/img.jpg" alt="">사용자이름
-          </a>
-          <div class="dropdown-menu dropdown-usermenu pull-right">
-            <a class="dropdown-item" href="#"><i class="fa fa-sign-out pull-right"></i> 로그아웃</a>
-          </div>
-        </li>
-        <li role="presentation" class="nav-item dropdown open">
-          <a href="javascript:;" class="dropdown-toggle info-number">
-            <i class="fa fa-envelope-o"></i>
-            <span class="badge bg-green">3</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
+
 </div>
 </body>
 </html>
