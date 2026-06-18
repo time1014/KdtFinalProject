@@ -2,12 +2,48 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{common/layouts/default_layout :: layout(~{::section})}">
 <head>
-    <title>WEPLE - 공통 관리</title>
+    <meta charset="UTF-8">
+    <title>프로젝트 목록</title>
 </head>
 <body>
 
     <section>
-        본인 작성 내역 여기다 넣기
+        <div class="x_panel" style="margin: 20px; padding: 20px; background: #fff; border: 1px solid #E6E9ED;">
+            <h2>프로젝트 목록</h2>
+            
+            <table class="project-table" style="width:100%; border-collapse: collapse; margin-top:20px;">
+                <thead>
+                    <tr style="background-color: #fffde7; border-top: 2px solid #ffd600; border-bottom: 1px solid #e0e0e0;">
+                        <th style="padding: 12px; font-weight: bold;">NO</th>
+                        <th style="padding: 12px; font-weight: bold;">프로젝트명</th>
+                        <th style="padding: 12px; font-weight: bold;">설명</th>
+                        <th style="padding: 12px; font-weight: bold;">등록일</th>
+                        <th style="padding: 12px; font-weight: bold;">마감일</th>
+                        <th style="padding: 12px; font-weight: bold;">상태</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="project, stat : ${projects}" style="border-bottom:1px solid #f1f1f1; text-align: center;">
+                        <td style="padding: 12px;" th:text="${stat.count}">1</td>
+                        <td style="padding: 12px; text-align: left;" th:text="${project.project_title}">프로젝트 제목</td>
+                        <td style="padding: 12px; text-align: left;" th:text="${project.project_describe}">프로젝트 설명</td>
+                        <td style="padding: 12px;" th:text="${#dates.format(project.created_at, 'yyyy-MM-dd')}">2026-01-01</td>
+                        <td style="padding: 12px;" th:text="${#dates.format(project.finish_date, 'yyyy-MM-dd')}">2026-12-31</td>
+                        
+                        <td style="padding: 12px;">
+                            <span th:if="${project.project_status == '신규'}" class="status-badge badge-new" th:text="${project.project_status}">신규</span>
+                            <span th:if="${project.project_status == '진행중'}" class="status-badge badge-ing" th:text="${project.project_status}">진행중</span>
+                            <span th:if="${project.project_status == '완료'}" class="status-badge badge-done" th:text="${project.project_status}">완료</span>
+                            <span th:if="${#strings.isEmpty(project.project_status)}">-</span>
+                        </td>
+                    </tr>
+                    
+                    <tr th:if="${#lists.isEmpty(projects)}">
+                        <td colspan="6" style="padding: 40px; color: #9e9e9e;">등록된 프로젝트가 존재하지 않습니다.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 
 </body>
