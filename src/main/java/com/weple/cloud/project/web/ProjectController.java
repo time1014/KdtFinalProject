@@ -1,6 +1,7 @@
 package com.weple.cloud.project.web;
 
-import org.hibernate.mapping.List;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,10 +20,10 @@ public class ProjectController {
 	}
 	
 	// 프로젝트 목록 조회 : projectList, project/list.html
-	@GetMapping
+	@GetMapping("/project/list")
 	public String projectList(Model model) {
 		List<ProjectVO> list = projectService.findAll();
 		model.addAttribute("projects", list);
-		return "project/list";
+		return "weple/project/list";
 	}
 }
