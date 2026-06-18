@@ -11,66 +11,161 @@
     list-style-type: none !important;
 }
 
-/* 2. [좌측 사이드바] 맑고 트렌디한 하늘색 톤으로 업그레이드 */
-body.nav-md .container.body .left_col {
-    background: #AEC6FF !important; /* 쨍함을 빼고 맑은 느낌을 더한 파스텔 하늘색 */
+/* 2. [좌측 사이드바] 흰 배경 + 선택 항목만 하이라이트 (창 크기와 상관없이 항상 고정) */
+body .container.body .left_col,
+body.nav-sm .container.body .left_col,
+body.nav-md .container.body .left_col,
+.left_col.scroll-view {
+    background: #ffffff !important;
+    border-right: 1px solid #E6EDF8 !important;
+    width: 230px !important; /* 🔥 창이 작아져도 무조건 너비 230px 고정 */
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    
+    position: fixed !important;    /* 🔥 사이드바를 화면 좌측에 완전 고정하여 자림 방지 */
+    height: 100vh !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1000 !important;
 }
 
+/* 📌 로고 영역 구조 정밀 교정 (우측 세로선 복원 및 로고 상하 정중앙 정렬 완벽 반영) */
+.left_col .navbar.nav_title,
 .nav_title {
-    background: #AEC6FF !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #E6EDF8 !important; 
+    border-right: 1px solid #E6EDF8 !important;  
+    text-align: left !important;
+    
+    /* 🔥 상단 내부 여백을 조절하여 WEPLE 문구를 박스 세로 정중앙으로 배치 */
+    padding: 10px 0 0 24px !important;
+    margin: 0 !important;
+    width: 230px !important; 
+    
+    position: absolute !important;   
+    top: 0 !important;
+    left: 0 !important;
+    
+    /* 🔥 하단 가로선이 우측 영역과 수평을 이루도록 높이 조절 및 내부 정렬 라인 매칭 */
+    height: 81px !important;         
+    line-height: 60px !important;    
+    
+    z-index: 1001 !important;        
+    box-sizing: border-box !important;
+    display: block !important;
+}
+
+/* 타이틀 아이콘 숨김 */
+.nav_title .site_title i {
+    display: none !important;
 }
 
 .site_title span {
-    color: #2B4C7E !important; /* 가독성을 높이면서 세련된 소프트 네이비 */
+    color: #5271FF !important;
     font-weight: bold !important;
     font-size: 22px !important;
     letter-spacing: -0.5px;
+    display: inline-block !important; 
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 🔥 늘어난 로고 영역 전체 높이에 맞춰 사이드 메뉴 시작 지점 하향 조정 */
+.nav.side-menu {
+    margin-top: 81px !important; 
 }
 
 .nav.side-menu > li {
-    padding: 3px 12px !important; /* 사이드바 내부 여백 넓혀 답답함 해소 */
+    padding: 2px 10px !important;
+    width: 100% !important;
+    display: block !important;
 }
 
-/* 메뉴들을 안쪽으로 밀어주고 글자 크기를 살짝 다듬어 투박함 제거 */
 .nav.side-menu > li > a {
-    color: #384A66 !important; /* 완전 검은색이 아닌 진한 블루그레이 */
-    font-weight: 600 !important;
+    color: #64748B !important;
+    font-weight: 500 !important;
     background: transparent !important;
-    border-radius: 8px !important; 
-    padding: 12px 20px !important; /* 위아래, 좌우 여백을 넓혀 글씨를 안쪽으로 정렬 */
-    font-size: 13px !important;    /* 글씨 크기를 아주 살짝만 줄여서 여유 공간 확보 */
+    border-radius: 8px !important;
+    padding: 11px 16px !important;
+    font-size: 13px !important;
     letter-spacing: -0.3px !important;
-    border-right: none !important; 
+    border-right: none !important;
     transition: all 0.2s ease-in-out !important;
+    display: block !important;
+    text-align: left !important; /* 🔥 축소 시 가운데 정렬되는 것 차단 */
 }
 
-/* 활성화 및 마우스 호버 시 스무스한 블루 포인트 */
-.nav.side-menu > li > a:hover,
-.nav.side-menu > li.active > a {
-    background: #6C8DFF !important; /* 청량하고 트렌디한 미디엄 블루 */
-    color: #ffffff !important;
-    border-radius: 8px !important; 
-    border-right: none !important; 
+/* 메뉴 안의 아이콘과 글자가 숨겨지거나 깨지는 현상 차단 */
+.nav.side-menu > li > a i {
+    font-size: 14px !important;
+    width: 20px !important;
+    margin-right: 10px !important;
+    display: inline-block !important;
+    color: #64748B !important;
+    text-align: left !important;
 }
 
-/* 템플릿 자체에서 테두리를 li 구조에 강제로 넣는 경우를 대비한 완전 방어 코드 */
+.nav.side-menu > li > a span,
+.nav.side-menu > li > a {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.nav.side-menu > li > a:hover {
+    background: #F0F4FF !important;
+    color: #5271FF !important;
+    border-radius: 8px !important;
+    border-right: none !important;
+}
+.nav.side-menu > li > a:hover i {
+    color: #5271FF !important;
+}
+
+/* 📌 원래 이쁘게 들어가 있던 파란색 활성화 스타일 완벽 복원 */
+.nav.side-menu > li.active > a,
+body.nav-sm .nav.side-menu > li.active-sm > a,
+body.nav-sm .nav.side-menu > li.active > a {
+    background: #EBF0FF !important;
+    color: #5271FF !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    border-right: none !important;
+    border-left: 3px solid #5271FF !important;
+    padding-left: 13px !important;
+    display: block !important;
+}
+.nav.side-menu > li.active > a i,
+body.nav-sm .nav.side-menu > li.active-sm > a i {
+    color: #5271FF !important;
+}
+
 .nav.side-menu > li.active {
     border-right: none !important;
 }
 
-/* 3. [우측 컨테이너 배경] 칙칙한 회색 탈피, 메인 하늘색과 연결되는 초경량 블루 틴트 */
-body.nav-md .container.body .right_col {
-    background: #F4F7FC !important; /* 회색기 없는 아주 맑고 밝은 블루 화이트 */
+/* 3. [우측 컨테이너 배경] 창 크기와 상관없이 좌측 메뉴 너비(230px)만큼 항상 여백 확보 */
+body .container.body .right_col,
+body.nav-md .container.body .right_col,
+body.nav-sm .container.body .right_col {
+    background: #F4F7FC !important;
     min-height: 100vh;
     margin-left: 230px !important;       
     width: calc(100% - 230px) !important; 
+    position: relative !important;
+    float: right !important;
 }
 
-/* 4. [상단 헤더바] */
-.top_nav .nav_menu {
+/* 4. [상단 헤더바] - 중앙 정렬 무너짐 교정 */
+.top_nav,
+.top_nav .nav_menu,
+.nav_menu {
     background: #ffffff !important;
-    border-bottom: 1px solid #E6EDF8 !important; /* 선 색상도 연한 하늘색 톤 조절 */
+}
+
+.top_nav .nav_menu {
+    border-bottom: 1px solid #E6EDF8 !important;
     margin-bottom: 0 !important;
     padding: 0 24px !important;
     height: 60px !important;
@@ -100,37 +195,42 @@ body.nav-md .container.body .right_col {
     color: #384A66 !important;
 }
 
-/* 프로필 이미지 테두리 톤 다운 */
 .header-profile-right img {
     width: 34px !important;
     height: 34px !important;
     border-radius: 50% !important;
     object-fit: cover;
-    border: 2px solid #6C8DFF !important; /* 헤더 타이틀과 톤을 맞춘 블루 테두리 */
+    border: 2px solid #6C8DFF !important;
 }
 
-/* 5. [중단 서브 메뉴바] */
-/* 상단의 답답한 가로선을 거의 안 보일 정도로 투명하게 지우고 그림자로 대체 */
+/* 5. [중단 서브 메뉴바] - 창 축소 시 글자 찌그러짐 및 강제 줄바꿈 방지 수정 */
 .sub_menu_nav {
     background: #ffffff !important;
-    border-bottom: 1px solid #EBF1FA !important; /* 아주 연한 하늘색 선으로 가볍게 처리 */
-    box-shadow: 0 2px 4px rgba(141, 174, 255, 0.02) !important; /* 얇은 그림자로 공간감 부여 */
+    border-bottom: 1px solid #EBF1FA !important;
+    box-shadow: 0 2px 4px rgba(141, 174, 255, 0.02) !important;
     width: 100% !important;
+    overflow-x: auto !important; /* 창이 너무 작아지면 메뉴바 내부에 가로 스크롤 생성 */
 }
 
 .sub_menu_nav ul {
     display: flex !important;
     flex-direction: row !important;
+    flex-wrap: nowrap !important; /* 메뉴가 밑으로 떨어지지 않도록 설정 */
     padding: 0 24px !important;
     margin: 0 !important;
     gap: 20px !important;
     height: 45px !important;
     align-items: center !important;
+    width: max-content !important; /* 자식 요소들의 원본 너비 보존 */
+}
+
+.sub_menu_nav ul li {
+    flex-shrink: 0 !important; /* 창이 줄어들어도 메뉴 항목 너비가 좁아지지 않음 */
 }
 
 .sub_menu_nav ul li a {
     text-decoration: none !important;
-    color: #8493A8 !important; /* 차분한 서브 텍스트 컬러 */
+    color: #8493A8 !important;
     font-size: 14px !important;
     font-weight: 600 !important;
     padding: 11px 2px !important;
@@ -138,44 +238,42 @@ body.nav-md .container.body .right_col {
     background: none !important;
     border: none !important;
     transition: color 0.15s ease !important;
+    white-space: nowrap !important; /* 글자 내부 줄바꿈 완전 차단 */
 }
 
 .sub_menu_nav ul li.active a,
 .sub_menu_nav ul li a:hover {
     color: #6C8DFF !important;
-    border-bottom: 2px solid #6C8DFF !important; /* 선택바 라인도 정돈된 블루 */
+    border-bottom: 2px solid #6C8DFF !important;
 }
 
 /* 6. [메인 캔버스 영역] */
-/* 위쪽 여백(Margin)과 도화지 안쪽 여백(Padding)을 넓혀 가두어진 느낌 해소 */
 .main_white_canvas_container {
     background: #ffffff !important; 
-    margin: 32px 24px !important; /* 위아래 여백을 32px로 넓혀 상단 서브바와 조화로운 격리 */
-    padding: 40px !important;     /* 안쪽 여백을 넓혀 본문 콘텐츠가 숨 쉴 수 있게 처리 */
-    border-radius: 14px !important; /* 조금 더 부드럽게 라운딩값 상향 */
-    box-shadow: 0 8px 24px rgba(141, 174, 255, 0.08) !important; /* 메인 하늘색을 품은 은은한 그림자 효과 */
+    margin: 32px 24px !important;
+    padding: 40px !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 24px rgba(141, 174, 255, 0.08) !important;
     min-height: calc(100vh - 160px) !important;
 }
 
 
 /* ==========================================================================
    ★ 컴포넌트 디테일 보정 (보라색 포인트 톤 다운 & 테이블 선 정리)
-   ========================================================================== */
+   ========================================================================= */
 
-/* 이미지 속 상단 일감 보라색 배지 및 페이지네이션 번호 등 칩 스타일 */
 .badge-purple, 
 .pagination .active a,
 .table td .project-label,
 .table td span[class*="label-"] {
-    background-color: #EBF0FF !important; /* 아주 연한 블루 라벤더 배경 */
-    color: #5271FF !important;            /* 세련된 블루 퍼플 글씨 */
+    background-color: #EBF0FF !important;
+    color: #5271FF !important;
     border-radius: 6px !important; 
     padding: 4px 10px !important;
     font-weight: 600 !important;
     border: none !important;
 }
 
-/* 페이지네이션 기본 버튼 스타일 */
 .pagination li a {
     color: #64748b !important;
     border-radius: 6px !important;
@@ -183,33 +281,31 @@ body.nav-md .container.body .right_col {
     border: 1px solid #E6EDF8 !important;
 }
 
-/* 테이블 외곽선 및 내부 선 맑게 정돈 */
 .table-responsive, 
 .table-container {
     border-radius: 10px !important; 
     overflow: hidden !important;   
-    border: 1px solid #E6EDF8 !important; /* 칙칙하지 않은 맑은 하늘색 격자 틀 */
+    border: 1px solid #E6EDF8 !important;
 }
 
 .table th {
-    background-color: #F8FAFD !important; /* 헤더 영역 영역 분리 */
+    background-color: #F8FAFD !important;
     color: #4A5568 !important;
     border-bottom: 1px solid #E6EDF8 !important;
 }
 
 .table td {
-    border-bottom: 1px solid #F0F4FA !important; /* 가로선 두께와 명도를 대폭 낮춤 */
+    border-bottom: 1px solid #F0F4FA !important;
     color: #4A5568 !important;
 }
 
 
 /* ==========================================================================
-   ★ [신규] 이미지 속 끈질긴 초록색 요소들 완전 제거 저격 코드
+   ★ 이미지 속 끈질긴 초록색 요소들 및 Gentelella 기본 컨테이너 제거 저격 코드
    ========================================================================== */
 
-/* 1. 왼쪽 상단 브라우저 주소창 아래 생기는 초록색 로딩바 (NProgress) 색상 변경 */
 #nprogress .bar {
-    background: #6C8DFF !important; /* 초록색 대신 우리 테마의 미디엄 블루로 변경 */
+    background: #6C8DFF !important;
 }
 #nprogress .peg {
     box-shadow: 0 0 10px #6C8DFF, 0 0 5px #6C8DFF !important;
@@ -219,7 +315,6 @@ body.nav-md .container.body .right_col {
     border-left-color: #6C8DFF !important;
 }
 
-/* 2. 오른쪽 상단 로그아웃 버튼이나 드롭다운 근처에 숨어있는 초록색 라인 지우기 */
 .top_nav .dropdown-menu,
 .top_nav .user-profile,
 .top_nav .toggle,
@@ -229,8 +324,21 @@ body.nav-md .container.body .right_col {
     border-top: none !important;
 }
 
-/* 특정 템플릿 아이콘 박스에 강제로 박힌 보더 차단 */
-.nav-sm .container.body .left_col .sidebar-footer, 
-.sidebar-footer a {
-    border-top: none !important;
+.nav-sm .container.body .left_col .sidebar-footer,
+.sidebar-footer,
+.sidebar-footer a,
+.left_col .sidebar-footer,
+body .sidebar-footer {
+    display: none !important;
+    background: transparent !important;
+    border: none !important;
+    height: 0 !important;
+}
+
+/* 부모 구조체 전체의 까만색 배경색 초기화 */
+body .container.body,
+.container.body,
+body .main_container,
+.main_container {
+    background: #F4F7FC !important;
 }
