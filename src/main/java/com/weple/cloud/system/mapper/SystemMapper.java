@@ -2,6 +2,8 @@ package com.weple.cloud.system.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.weple.cloud.system.service.TaskTypeVO;
 
 public interface SystemMapper {
@@ -14,8 +16,11 @@ public interface SystemMapper {
 	// 등록
 	public int insertTaskType(TaskTypeVO taskType);
 	
-	// 편집
+	// 순서 수정(드래그&드랍 결과)
+	int updatePosition(@Param("typeId") Integer typeId, @Param("position") Integer position);
 	
+	// 편집
+	public int updateTaskType(TaskTypeVO taskType);
 	
 	// 삭제
 }
