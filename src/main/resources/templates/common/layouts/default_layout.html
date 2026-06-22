@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content)">
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content, head)">
 <head>
     <th:block th:replace="~{common/configs/config :: configFragment}"></th:block>
+    
+    <th:block th:replace="${head} ?: ~{}"></th:block>
 </head>
 
 <body class="nav-md">
