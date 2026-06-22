@@ -1,15 +1,11 @@
-package com.weple.cloud.system.mapper;
+package com.weple.cloud.system.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.weple.cloud.system.service.SystemGroupVO;
-import com.weple.cloud.system.service.SystemService;
-import com.weple.cloud.system.service.TaskTypeVO;
+import com.weple.cloud.system.mapper.SystemMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,9 +14,9 @@ import lombok.RequiredArgsConstructor;
 public class SystemServiceImpl implements SystemService {
 
 	private final SystemMapper systemMapper;
-	
-	//-------------------------------일감유형------------------------------
-	
+
+	// -------------------------------일감유형------------------------------
+
 	// 일감유형 전체조회
 	@Override
 	public List<TaskTypeVO> findTaskTypeAll() {
@@ -34,7 +30,7 @@ public class SystemServiceImpl implements SystemService {
 		taskTypeVO.setCompanyId(1);
 		systemMapper.insertTaskType(taskTypeVO);
 	}
-	
+
 	// 일감유형 순서 수정
 	@Override
 	@Transactional
@@ -44,7 +40,7 @@ public class SystemServiceImpl implements SystemService {
 			systemMapper.updatePosition(sortedIds.get(i), position);
 		}
 	}
-	
+
 	@Override
 	public void updateTaskType(TaskTypeVO taskTypeVO) {
 		systemMapper.updateTaskType(taskTypeVO);
@@ -56,32 +52,4 @@ public class SystemServiceImpl implements SystemService {
 		return 0;
 	}
 
-	//-------------------------------그룹 종류------------------------------
-	//그룹 전체조회
-	@Override
-	public List<SystemGroupVO> findGroupAll(String keyword) {
-		return systemMapper.selectGroupAll(keyword);
-	}
-
-	//그룹 등록
-	@Override
-	public int addGroup(SystemGroupVO systemGroupVO) {
-		// 임시 테스트용 회사 ID
-	    systemGroupVO.setCompanyId(1);
-	    
-		int result = systemMapper.insertGroup(systemGroupVO);
-		return result == 1 ? systemGroupVO.getGroupId() : -1;
-	}
-
-	//그룹 삭제
-	@Override
-	public Map<String, Object> removeGroup(int groupId) {
-		Map<String, Object> map = new HashMap<>();
-		int result = systemMapper.deleteGroup(groupId);
-		if(result >= 1) {
-			map.put("groupId", groupId);
-		}
-		return map;
-	}
-	
 }

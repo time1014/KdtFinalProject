@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.weple.cloud.system.service.SystemGroupVO;
 import com.weple.cloud.system.service.TaskTypeVO;
 
 public interface SystemMapper {
@@ -23,13 +22,5 @@ public interface SystemMapper {
 	
 	// 삭제
 	
-	// ---------------------------- 그룹 종류 --------------------------
-	//전체조회
-	public List<SystemGroupVO> selectGroupAll(String keyword);
-		
-	//등록
-	public int insertGroup(SystemGroupVO systemGroupVO);
-		
-	//삭제
-	public int deleteGroup(int groupId);
+	
 }

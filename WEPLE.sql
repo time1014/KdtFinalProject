@@ -337,6 +337,12 @@ SELECT table_name FROM user_tables ORDER BY table_name;
 
 DESC groups;
 SELECT *FROM groups ORDER BY group_id;
+select * from groups;
+select * from users;
+
+update users
+set group_id = null
+where user_name = '다그닥';
 
 SELECT g.group_id
      , g.company_id
@@ -361,3 +367,38 @@ VALUES(20, 1, '디자인팀');
 SELECT sequence_name
 FROM user_sequences;
 COMMIT;
+select * from users;
+select * from groups;
+
+update users
+set group_id = null
+where user_name = '다그닥';
+
+update users
+set admin_yn = 1
+where user_name = '담당근';
+
+SELECT w.task_classification_id
+       , w.company_id
+       , w.work_name
+       , w.default_yn
+       , w.using_yn
+FROM work_classification w
+JOIN companies c ON c.company_id = w.company_id
+UNION ALL
+SELECT t.task_priority_id
+       , t.company_id
+       , t.priority_name
+       , t.default_yn
+       , t.using_yn
+FROM task_priority t
+JOIN companies c ON c.company_id = t.company_id
+ORDER BY 1;
+
+
+DESC work_classification;
+select * from companies;
+select * from work_classification;
+select * from task_priority;
+
+

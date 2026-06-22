@@ -2,44 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-<div th:fragment="navbarSettingFragment" class="sub_menu_nav">
+<div th:fragment="navbarSettingFragment" class="sub_menu_nav" th:if="${currentMenu != 'none'}">
     <ul>
-        <li>
-            <a th:href="@{/projectSettingList}" 
-               th:class="${menu == 'project' || menu == null} ? 'active' : ''">프로젝트</a>
-        </li>
-        <li>
-            <a th:href="@{/userList}" 
-               th:class="${menu == 'user'} ? 'active' : ''">사용자</a>
-        </li>
-        <li>
-            <a th:href="@{/groupList}" 
-               th:class="${menu == 'group'} ? 'active' : ''">그룹</a>
-        </li>
-        <li>
-            <a th:href="@{/roleList}" 
-               th:class="${menu == 'role'} ? 'active' : ''">역할 및 권한</a>
-        </li>
-        <li>
-            <a th:href="@{/issueTypeList}" 
-               th:class="${menu == 'issueType'} ? 'active' : ''">일감 유형</a>
-        </li>
-        <li>
-            <a th:href="@{/issueStatusList}" 
-               th:class="${menu == 'issueStatus'} ? 'active' : ''">일감 상태</a>
-        </li>
-        <li>
-            <a th:href="@{/codeList}" 
-               th:class="${menu == 'code'} ? 'active' : ''">코드값</a>
-        </li>
-        <li>
-            <a th:href="@{/settingDetail}" 
-               th:class="${menu == 'setting'} ? 'active' : ''">설정</a>
-        </li>
-        <li>
-            <a th:href="@{/approvalList}" 
-               th:class="${menu == 'approval'} ? 'active' : ''">가입승인</a>
-        </li>
+        <li><a th:href="@{/projectSettingList}"th:class="${menu == 'project' || menu == null} ? 'active' : ''">프로젝트</a></li>
+        <li><a th:href="@{/userList}"th:class="${menu == 'user'} ? 'active' : ''">사용자</a></li>
+        <li><a th:href="@{/groupList}"th:class="${menu == 'group'} ? 'active' : ''">그룹</a></li>
+        <li><a th:href="@{/roleList}"th:class="${menu == 'role'} ? 'active' : ''">역할 및 권한</a></li>
+        <li><a th:href="@{/issueTypeList}"th:class="${menu == 'issueType'} ? 'active' : ''">일감 유형</a></li>
+        <li><a th:href="@{/issueStatusList}"th:class="${menu == 'issueStatus'} ? 'active' : ''">일감 상태</a></li>
+        <li><a th:href="@{/codeValueList}"th:class="${menu == 'code'} ? 'active' : ''">코드값</a></li>
+        <li><a th:href="@{/settingDetail}"th:class="${menu == 'setting'} ? 'active' : ''">설정</a></li>
+        <li><a th:href="@{/approvalList}"th:class="${menu == 'approval'} ? 'active' : ''">가입승인</a></li>
     </ul>
 </div>
 <style>
