@@ -14,6 +14,9 @@ public interface SignupMapper {
     // 같은 로그인 아이디가 이미 존재하는지 확인합니다.
     int countUserByLoginId(@Param("loginId") String loginId);
 
+    // 같은 이메일 주소가 이미 존재하는지 확인합니다.
+    int countUserByEmail(@Param("email") String email);
+
     // 검증이 끝난 회원가입 정보를 USERS 테이블에 저장합니다.
     int insertSignupUser(SignupRequestVO request);
 }

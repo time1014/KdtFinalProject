@@ -114,7 +114,49 @@ public class SystemController {
 //	@PutMapping("/system/taskTypeUpdate")
 //	public String
 	
-	
-	
+	// ---------------------------- 가입승인 --------------------------
+	private final com.weple.cloud.system.service.SignupApprovalService signupApprovalService;
+
+	// 현재 로그인한 관리자의 회사에 접수된 승인 대기 회원을 조회합니다.
+	@GetMapping("/approvalList")
+	public String approvalList(
+			@org.springframework.security.core.annotation.AuthenticationPrincipal com.weple.cloud.auth.service.LoginUserDetails loginUser,
+			Model model) {
+		List<com.weple.cloud.system.service.SignupApprovalUserVO> pendingUsers =
+				signupApprovalService.findPendingUsers(loginUser.getLoginUser().getCompanyId());
+		model.addAttribute("pendingUsers", pendingUsers);
+		model.addAttribute("menu", "approval");
+		return "weple/admin/config/join-request";
+	}
+
+	// 요청 URL의 사용자 코드만 받고 회사 정보는 로그인 세션에서 가져와 승인합니다.
+	@PostMapping("/approvalList/{userCode}/approve")
+	public String approveSignupRequest(
+			@org.springframework.security.core.annotation.AuthenticationPrincipal com.weple.cloud.auth.service.LoginUserDetails loginUser,
+			@org.springframework.web.bind.annotation.PathVariable String userCode,
+			org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+		try {
+			signupApprovalService.approvePendingUser(loginUser.getLoginUser().getCompanyId(), userCode);
+			redirectAttributes.addFlashAttribute("approvalSuccess", "가입 요청을 승인했습니다.");
+		} catch (IllegalArgumentException ex) {
+			redirectAttributes.addFlashAttribute("approvalError", ex.getMessage());
+		}
+		return "redirect:/approvalList";
+	}
+
+	// 취소한 승인 대기 가입 요청은 USERS 테이블에서 삭제합니다.
+	@PostMapping("/approvalList/{userCode}/cancel")
+	public String cancelSignupRequest(
+			@org.springframework.security.core.annotation.AuthenticationPrincipal com.weple.cloud.auth.service.LoginUserDetails loginUser,
+			@org.springframework.web.bind.annotation.PathVariable String userCode,
+			org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+		try {
+			signupApprovalService.cancelPendingUser(loginUser.getLoginUser().getCompanyId(), userCode);
+			redirectAttributes.addFlashAttribute("approvalSuccess", "가입 요청을 취소했습니다.");
+		} catch (IllegalArgumentException ex) {
+			redirectAttributes.addFlashAttribute("approvalError", ex.getMessage());
+		}
+		return "redirect:/approvalList";
+	}
 	
 }

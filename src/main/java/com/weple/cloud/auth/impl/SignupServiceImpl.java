@@ -36,6 +36,11 @@ public class SignupServiceImpl implements SignupService {
             throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
         }
 
+        // 이메일도 계정별로 하나만 사용할 수 있도록 저장 전에 확인합니다.
+        if (signupMapper.countUserByEmail(request.getEmail()) > 0) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
         // 비밀번호는 DB에 원문이 아니라 BCrypt 암호화 값으로 저장합니다.
         request.setCompanyId(companyId);
         request.setEncodedPassword(passwordEncoder.encode(request.getPassword()));

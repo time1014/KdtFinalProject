@@ -23,6 +23,15 @@
         WHERE login_id = #{loginId}
     </select>
 
+    <!-- 대소문자만 다른 동일 이메일도 중복으로 처리함. -->
+    <select id="countUserByEmail"
+            parameterType="string"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM users
+        WHERE UPPER(email) = UPPER(#{email})
+    </select>
+
     <!-- 검증이 끝난 사용자를 가입 승인 대기 상태로 저장함. -->
     <insert id="insertSignupUser"
             parameterType="com.weple.cloud.auth.service.SignupRequestVO">
