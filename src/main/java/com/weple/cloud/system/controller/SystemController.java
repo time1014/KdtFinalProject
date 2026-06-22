@@ -5,19 +5,18 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.weple.cloud.system.service.SystemGroupVO;
-import com.weple.cloud.system.service.SystemProjectService;
-import com.weple.cloud.system.service.SystemProjectVO;
-import com.weple.cloud.system.service.SystemService;
+import com.weple.cloud.auth.service.LoginUserDetails;
+import com.weple.cloud.system.service.TaskTypeService;
 import com.weple.cloud.system.service.TaskTypeVO;
 
 import lombok.RequiredArgsConstructor;
@@ -26,80 +25,64 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SystemController {
 
-	private final SystemService systemService;
+	private final TaskTypeService taskTypeService;
 
-	// ---------------------------- 그룹 종류 --------------------------
-	// 전체조회
-	@GetMapping("groupList")
-	public String systemGroupList(@RequestParam(required = false) String keyword, Model model) {
-		List<SystemGroupVO> list = systemService.findGroupAll(keyword);
-		model.addAttribute("systemGroupList", list);
-		model.addAttribute("keyword", keyword);
-		model.addAttribute("menu", "group");
-		model.addAttribute("sidebarMenu", "system");
-		model.addAttribute("currentMenu", "group");
-		return "weple/admin/group/list";
-	}
-
-	// 등록
-	@GetMapping("groupInsert")
-	public String groupInsertForm() {
-		return "weple/admin/group/insert";
-	}
-
-	@PostMapping("groupInsert")
-	public String groupInsertProcess(SystemGroupVO systemGroupVO) {
-		systemGroupVO.setCompanyId(1);
-		int gno = systemService.addGroup(systemGroupVO);
-		return "redirect:groupList";
-	}
-
-	// 삭제
-	@GetMapping("groupDelete")
-	public String groupDelete(Integer groupId) {
-		systemService.removeGroup(groupId);
-		return "redirect:groupList";
-	}
 
 	// -------------------------------일감유형------------------------------
 	// 전체조회
 	@GetMapping("/system/taskType")
-	public String systemTaskTypeList(Model model) {
-		List<TaskTypeVO> list = systemService.findTaskTypeAll();
+	public String systemTaskTypeList(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
+		Long companyId = loginUser.getLoginUser().getCompanyId();
+		List<TaskTypeVO> list = taskTypeService.findTaskTypeAll(companyId);
 		model.addAttribute("taskTypes", list);
 		return "weple/system/taskType/list";
 	}
 
 	// 등록페이지 조회
-	@GetMapping("/system/taskTypeInsert")
+	@GetMapping("/system/taskType/Insert")
 	public String taskTypeInsert() {
 		return "weple/system/taskType/register";
 	}
 
 	// 등록하기
-	@PostMapping("/system/taskTypeInsert")
-	public String systemTaskTypeInsert(TaskTypeVO taskTypeVO) {
-		systemService.addTaskType(taskTypeVO);
+	@PostMapping("/system/taskType/Insert")
+	public String systemTaskTypeInsert(@AuthenticationPrincipal LoginUserDetails loginUser, TaskTypeVO taskTypeVO) {
+		Long companyId = loginUser.getLoginUser().getCompanyId();
+		taskTypeVO.setCompanyId(companyId);
+		taskTypeService.addTaskType(taskTypeVO);
 		return "redirect:/system/taskType";
 	}
 
 	// 순서 수정하기 (드래그&드랍으로 변경된 순서)
-	@PutMapping("/system/taskTypeReorder")
+	@PostMapping("/system/taskType/Reorder")
 	@ResponseBody
 	public ResponseEntity<String> systemTaskTypeReorder(@RequestBody List<Integer> sortedIds) {
-		systemService.reorderTaskTypes(sortedIds);
+		taskTypeService.reorderTaskTypes(sortedIds);
 		return ResponseEntity.ok("SUCCESS");
 	}
 
 	// 수정페이지 조회
-	@GetMapping("/system/taskTypeUpdate")
-	public String taskTypeUpdate() {
+	@GetMapping("/system/taskType/Update")
+	public String taskTypeUpdate(@RequestParam("typeId") int typeId, Model model) {
+		TaskTypeVO taskType = taskTypeService.findTaskTypeById(typeId);
+		model.addAttribute("taskType", taskType);
 		return "weple/system/taskType/register";
 	}
 
 	// 수정하기
-//	@PutMapping("/system/taskTypeUpdate")
-//	public String
+	@PostMapping("/system/taskType/Update")
+	public String systemTaskTypeUpdate(TaskTypeVO taskTypeVO) {
+		taskTypeService.updateTaskType(taskTypeVO);
+		return "redirect:/system/taskType";
+	}
+	
+	// 삭제하기
+	@PostMapping("/system/taskType/Delete/{typeId}")
+	@ResponseBody
+	public ResponseEntity<String> systemTaskTypeDelete(@PathVariable("typeId") int typeId) {
+		taskTypeService.deleteTaskType(typeId);
+		return ResponseEntity.ok("SUCCESS");
+	}
 
 	
 	// ---------------------------- 가입승인 --------------------------
