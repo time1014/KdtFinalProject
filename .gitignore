@@ -167,4 +167,4 @@ uploads/
 *.iml
 
 # application-secret
-application-secret.properties
+src/main/resources/application-secret.properties
