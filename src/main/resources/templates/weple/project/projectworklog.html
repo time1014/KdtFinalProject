@@ -90,7 +90,6 @@
 
         <h4 class="sub-list-title">작업내역 목록</h4>
 
-        <!-- ✅ null 제거한 유효한 목록만 추출 -->
         <th:block th:with="validLogs=${workLogList != null ? workLogList.?[#this != null and #this.actionAt != null] : T(java.util.Collections).emptyList()}">
 
             <div th:if="${validLogs.isEmpty()}" class="empty-message">

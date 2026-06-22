@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head></head>
 <body>
-<div th:fragment="navbarFragment" class="sub_menu_nav" th:if="${currentMenu != 'none'}">
+<div th:fragment="navbarFragment" class="sub_menu_nav" th:if="${currentMenu != 'none' and sidebarMenu != 'system'}">
     <ul>
         <li th:classappend="${currentMenu == 'overview'} ? 'active' : ''"><a href="#">개요</a></li>
         <li th:classappend="${currentMenu == 'worklog'} ? 'active' : ''"><a th:href="@{/project/worklog(projectId=${projectId})}">작업내역</a></li>

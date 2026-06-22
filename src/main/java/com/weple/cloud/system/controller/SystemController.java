@@ -1,7 +1,9 @@
 package com.weple.cloud.system.controller;
 
+
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.weple.cloud.system.service.SystemGroupVO;
+import com.weple.cloud.system.service.SystemProjectService;
+import com.weple.cloud.system.service.SystemProjectVO;
 import com.weple.cloud.system.service.SystemService;
 import com.weple.cloud.system.service.TaskTypeVO;
 
@@ -32,6 +36,8 @@ public class SystemController {
 		model.addAttribute("systemGroupList", list);
 		model.addAttribute("keyword", keyword);
 		model.addAttribute("menu", "group");
+		model.addAttribute("sidebarMenu", "system");
+		model.addAttribute("currentMenu", "group");
 		return "weple/admin/group/list";
 	}
 
@@ -142,7 +148,33 @@ public class SystemController {
 	}
 	//-------------------------------프로젝트------------------------------
 	// 프로젝트 생성
+	@Autowired
+	private SystemProjectService systemProjectService;
 	
+	@GetMapping("/system/project")
+	public String projectCreateForm(Model model) {
+		
+		model.addAttribute("sidebarMenu", "system");
+		model.addAttribute("currentMenu", "systemproject");
+		
+		return "weple/system/projectCreate";
+	}
+	
+	@PostMapping("/system/project")
+	public String projectCreateProcess(SystemProjectVO projectVO, Model model) {
+		int result = systemProjectService.createProject(projectVO);
+		
+		if(result > 0) {
+			return "redirect:/project";
+		}else {
+			model.addAttribute("errorMessage", "프로젝트 생성에 실패했습니다.");
+			model.addAttribute("sidebarMenu", "system");
+			model.addAttribute("currentMenu", "systemproject");
+			
+			
+			return "weple/system/projectCreate";
+		}
+	}
 	
 	
 }
