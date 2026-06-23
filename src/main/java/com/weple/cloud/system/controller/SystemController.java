@@ -27,6 +27,7 @@ import com.weple.cloud.system.service.TaskTypeService;
 import com.weple.cloud.system.service.TaskTypeVO;
 import com.weple.cloud.system.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
@@ -285,7 +286,12 @@ public class SystemController {
 	// 전체조회
 	@GetMapping("codeValueList")
 	public String codeValueList(Model model) {
-
+		List<CodeValueVO> codeList = codeValueService.findCodeValueAll();
+		if (codeList == null) {
+			codeList = new java.util.ArrayList<>();
+		}
+		model.addAttribute("codeList", codeList);
+		model.addAttribute("codeList", codeList);
 		model.addAttribute("menu", "code");
 		model.addAttribute("sidebarMenu", "system");
 
@@ -294,7 +300,10 @@ public class SystemController {
 
 	// 등록 양식
 	@GetMapping("/codeInsert")
-	public String codeInsertForm(Model model) {
+	public String codeInsertForm(@RequestParam("type") String type, Model model) {
+		String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
+	    model.addAttribute("pageTitle", pageTitle);
+		model.addAttribute("type", type);
 		model.addAttribute("menu", "code");
 		model.addAttribute("sidebarMenu", "system");
 		return "weple/admin/code/codeForm";
@@ -302,29 +311,46 @@ public class SystemController {
 
 	// 등록 처리
 	@PostMapping("codeInsert")
-	public String codeInsertProcess(CodeValueVO codeValueVO) {
-		int cno = codeValueService.addCodeValue(codeValueVO);
+	public String codeInsertProcess(CodeValueVO codeValueVO, @RequestParam("type") String type, HttpServletRequest request) {
+		// 임시로 회사 ID를 1로 세팅
+		codeValueVO.setCompanyId(1);
+		codeValueVO.setUsingYn(request.getParameter("usingYn") != null ? "Y" : "N");
+	    codeValueVO.setDefaultYn(request.getParameter("defaultYn") != null ? "Y" : "N");
+		codeValueService.addCodeValue(codeValueVO, type);
 		return "redirect:codeValueList";
 	}
 
-//	// 수정 양식
-//	@GetMapping("codeUpdate")
-//	public String codeUpdateForm(int cno, Model model) {
-//		CodeValueVO codeValue = codeValueService.modifyCodeValue(codeValueVO);
-//		model.addAttribute("codeValue", codeValue);
-//		model.addAttribute("menu", "code");
-//		model.addAttribute("sidebarMenu", "system");
-//
-//		return "weple/admin/code/codeUpdateForm";
-//	}
-//
-//	// 수정 처리
-//	@PostMapping("codeUpdate")
-//	public String codeUpdateProcess(CodeValueVO codeValueVO) {
-//		int result = codeValueService.modifyCodeValue(codeValueVO);
-//
-//		return "redirect:codeValueList";
-//	}
+	// 수정 양식
+	@GetMapping("codeUpdate")
+	public String codeUpdateForm(@RequestParam("cno") String cno, @RequestParam("type") String type, Model model) {
+		CodeValueVO vo = new CodeValueVO();
+		if ("work".equals(type)) {
+	        vo.setTaskClassificationId(cno);
+	    } else {
+	        vo.setTaskPriorityId(cno);
+	    }
+
+	    CodeValueVO result = codeValueService.findCodeValueInfo(vo, type);
+
+	    String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
+	    model.addAttribute("pageTitle", pageTitle);
+	    model.addAttribute("CodeValue", result);
+		model.addAttribute("type", type);
+		model.addAttribute("menu", "code");
+		model.addAttribute("sidebarMenu", "system");
+		return "weple/admin/code/codeForm";
+	}
+
+	// 수정 처리
+	@PostMapping("codeUpdate")
+	public String codeUpdateProcess(CodeValueVO codeValueVO, @RequestParam("type") String type, HttpServletRequest request) {
+		String defaultYn = (request.getParameter("defaultYn") != null) ? "Y" : "N";
+	    codeValueVO.setDefaultYn(defaultYn);
+	    String usingYn = (request.getParameter("usingYn") != null) ? "Y" : "N";
+	    codeValueVO.setUsingYn(usingYn);
+		codeValueService.modifyCodeValue(codeValueVO, type);
+	    return "redirect:codeValueList";
+	}
 
 	// -------------------------------프로젝트------------------------------
 	// 프로젝트 생성

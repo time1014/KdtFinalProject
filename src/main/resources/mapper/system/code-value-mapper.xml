@@ -1,31 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.weple.cloud.system.mapper.CodeValueMapper">
-	<!--  코드값 전체 조회 -->
+	<!-- 코드값 전체 조회 -->
 	<select id="selectCodeValueAll" resultType="CodeValueVO">
-		SELECT w.task_classification_id
-       		   , w.company_id
-       		   , w.work_name           AS work_name
-       		   , NULL                  AS priority_name
-       		   , w.default_yn
-       		   , w.using_yn
-		FROM work_classification w
-		JOIN companies c ON c.company_id = w.company_id
-		UNION ALL
-		SELECT t.task_priority_id
-       		   , t.company_id
-       		   , NULL                  AS work_name
-       		   , t.priority_name       AS priority_name
-       		   , t.default_yn
-       		   , t.using_yn
-		FROM task_priority t
-		JOIN companies c ON c.company_id = t.company_id
-		ORDER BY 1
+		SELECT  w.task_classification_id AS taskClassificationId
+        		, NULL AS taskPriorityId
+       		 	, w.work_name AS workName
+        		, NULL AS priorityName
+       		 	, w.default_yn AS defaultYn
+       		 	, w.using_yn AS usingYn
+    	FROM work_classification w
+    	JOIN companies c ON c.company_id = w.company_id
+    	
+    	UNION ALL
+    
+    	SELECT  NULL AS taskClassificationId
+        		, t.task_priority_id AS taskPriorityId
+        		, NULL AS workName
+        		, t.priority_name AS priorityName
+        		, t.default_yn AS defaultYn
+        		, t.using_yn AS usingYn
+    	FROM task_priority t
+    	JOIN companies c ON c.company_id = t.company_id
+    	ORDER BY 1, 2
 	</select>
-	
+
+	<select id="selectCodeValueInfo" parameterType="CodeValueVO" resultType="CodeValueVO">
+		<choose>
+
+        <when test="type == 'work'">
+            SELECT
+                task_classification_id AS taskClassificationId,
+                company_id             AS companyId,
+                work_name              AS workName,
+                default_yn             AS defaultYn,
+                using_yn               AS usingYn
+            FROM work_classification
+            WHERE task_classification_id = #{vo.taskClassificationId}
+        </when>
+
+        <otherwise>
+            SELECT
+                task_priority_id AS taskPriorityId
+                , company_id       AS companyId
+                , priority_name    AS priorityName
+                , default_yn       AS defaultYn
+                , using_yn         AS usingYn
+            FROM task_priority
+            WHERE task_priority_id = #{vo.taskPriorityId}
+        </otherwise>
+
+    </choose>
+	</select>
+
 	<!-- 코드값 등록 -->
-	
-	
+	<insert id="insertCodeValue" parameterType="map">
+		<choose>
+			<when test="type == 'work'">
+				INSERT INTO work_classification (
+												 task_classification_id
+												 , company_id
+												 , work_name
+												 , default_yn
+												 , using_yn
+												 )
+				VALUES (
+						SET_DAY_SEQ.NEXTVAL
+						, #{vo.companyId}
+						, #{vo.workName}
+						, #{vo.defaultYn}
+						, #{vo.usingYn}
+					   )
+			</when>
+			<otherwise>
+				INSERT INTO task_priority (
+											task_priority_id
+											, company_id
+											, priority_name
+											, default_yn
+											, using_yn
+										   )
+				VALUES (
+						SET_DAY_SEQ.NEXTVAL
+						, #{vo.companyId}
+						, #{vo.priorityName}
+						, #{vo.defaultYn}
+						, #{vo.usingYn}
+					   )
+			</otherwise>
+		</choose>
+	</insert>
+
 	<!-- 코드값 수정 -->
+	<update id="updateCodeValue" parameterType="CodeValueVO">
+		<choose>
+        <when test="taskClassificationId != null and taskClassificationId != ''">
+            UPDATE work_classification
+            SET work_name = #{workName},
+                default_yn = #{defaultYn},
+                using_yn = #{usingYn}
+            WHERE task_classification_id = #{taskClassificationId}
+        </when>
+        <otherwise>
+            UPDATE task_priority
+            SET priority_name = #{priorityName},
+                default_yn = #{defaultYn},
+                using_yn = #{usingYn}
+            WHERE task_priority_id = #{taskPriorityId}
+        </otherwise>
+    </choose>
+	</update>
 	
+	<update id="resetAllDefaultYn" parameterType="string">
+	    UPDATE ${type == 'work' ? 'work_classification' : 'task_priority'}
+	    SET default_yn = 'N'
+	</update>
+	
+	<update id="resetDefaultYn" parameterType="map">
+    	UPDATE ${type == 'work' ? 'work_classification' : 'task_priority'}
+    	SET default_yn = 'N'
+    	WHERE ${type == 'work' ? 'task_classification_id' : 'task_priority_id'} != #{id}
+	</update>
+
 </mapper>

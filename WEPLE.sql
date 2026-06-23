@@ -172,12 +172,6 @@ CREATE TABLE task (
     CONSTRAINT FK_TASK_MILESTONE FOREIGN KEY (milestone_id) REFERENCES milestone(milestone_id) ON DELETE SET NULL
 );
 
-
-
-
-
-
-
 -- 1. 회원 정보 참조 제약조건 수정 (기존 CASCADE를 삭제하고 SET NULL로 재설정)
 -- 먼저 테이블을 살짝 수정해야 하므로, 관련 테이블들을 다시 정리합니다.
 
@@ -378,21 +372,18 @@ update users
 set admin_yn = 1
 where user_name = '담당근';
 
-SELECT w.task_classification_id
-       , w.company_id
-       , w.work_name           AS work_name
-       , NULL                  AS priority_name
-       , w.default_yn
-       , w.using_yn
+SELECT w.task_classification_id   AS taskClassificationId
+     , w.work_name              AS workName
+     , NULL                     AS priorityName
+     , w.default_yn             AS defaultYn
+     , w.using_yn               AS usingYn
 FROM work_classification w
 JOIN companies c ON c.company_id = w.company_id
 UNION ALL
-SELECT t.task_priority_id
-       , t.company_id
-       , NULL                  AS work_name
-       , t.priority_name       AS priority_name
-       , t.default_yn
-       , t.using_yn
+SELECT t.task_priority_id      AS taskPriorityId  , NULL
+      , t.priority_name       AS priorityName
+      , t.default_yn          AS defaultYn
+      , t.using_yn            AS usingYn
 FROM task_priority t
 JOIN companies c ON c.company_id = t.company_id
 ORDER BY 1;
@@ -401,8 +392,67 @@ desc companies;
 DESC work_classification;
 desc task_priority;
 
+UPDATE work_classification
+SET using_yn = 'Y'
+WHERE task_classification_id = 10;
+
 select * from companies;
 select * from work_classification;
 select * from task_priority;
 
+select * from companies;
+select * from permissions;
+select * from role_permissions;
+select * from roles;
+
+SELECT c.company_id
+       , c.company_code
+       , c.company_name
+       , created_at
+       , r.role_id
+       , r.role_name
+       , rp.permission_code
+       , p.permission_tag
+       , p.permission_name
+FROM companies c
+JOIN roles r ON r.company_id = c.company_id
+LEFT JOIN role_permissions rp ON rp.role_id = r.role_id
+LEFT JOIN permissions p ON p.permission_code = rp.permission_code
+ORDER BY 1;
+
 commit;
+
+SELECT task_classification_id,
+           company_id,
+           work_name,
+           priority_name,
+           default_yn,
+           using_yn
+    FROM (
+        SELECT w.task_classification_id,
+               w.company_id,
+               w.work_name,
+               CAST(NULL AS VARCHAR2(200)) AS priority_name,
+               w.default_yn,
+               w.using_yn
+        FROM work_classification w
+        JOIN companies c ON c.company_id = w.company_id
+        WHERE w.task_classification_id = 10
+        
+        UNION ALL
+        
+        SELECT t.task_priority_id,
+               t.company_id,
+               CAST(NULL AS VARCHAR2(200)) AS work_name,
+               t.priority_name,
+               t.default_yn,
+               t.using_yn
+        FROM task_priority t
+        JOIN companies c ON c.company_id = t.company_id
+        WHERE t.task_priority_id = 10
+    )
+    WHERE ROWNUM <= 1;
+    
+SELECT t.task_priority_id, t.company_id, t.priority_name, t.default_yn, t.using_yn
+FROM task_priority t
+JOIN companies c ON c.company_id = t.company_id;
