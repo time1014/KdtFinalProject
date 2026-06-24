@@ -23,6 +23,8 @@ import com.weple.cloud.system.service.CodeValueService;
 import com.weple.cloud.system.service.CodeValueVO;
 import com.weple.cloud.system.service.GroupService;
 import com.weple.cloud.system.service.RoleService;
+import com.weple.cloud.system.service.SelectTotalTimeService;
+import com.weple.cloud.system.service.SelectTotalTimeVO;
 import com.weple.cloud.system.service.SystemGroupUserVO;
 import com.weple.cloud.system.service.SystemGroupVO;
 import com.weple.cloud.system.service.SystemProjectService;
@@ -295,6 +297,7 @@ public class SystemController {
 	@GetMapping("codeValueList")
 	public String codeValueList(Model model) {
 		List<CodeValueVO> codeList = codeValueService.findCodeValueAll();
+		// 조회 결과가 없으면 빈 리스트 생성해서 넣음
 		if (codeList == null) {
 			codeList = new java.util.ArrayList<>();
 		}
@@ -308,7 +311,9 @@ public class SystemController {
 
 	// 등록 양식
 	@GetMapping("/codeInsert")
+	//codeInsert?type=work처럼 접속하면 실행, type 값을 받아 화면에 전달
 	public String codeInsertForm(@RequestParam("type") String type, Model model) {
+		// 타입이 WORK이면 작업분류, 아니면 일감 우선순위
 		String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
 	    model.addAttribute("pageTitle", pageTitle);
 		model.addAttribute("type", type);
@@ -319,19 +324,28 @@ public class SystemController {
 
 	// 등록 처리
 	@PostMapping("codeInsert")
-	public String codeInsertProcess(CodeValueVO codeValueVO, @RequestParam("type") String type, HttpServletRequest request) {
+	//용자가 입력한 폼(form)의 값들을 CodeValueVO 객체에 자동으로 담아즘
+	public String codeInsertProcess(@ModelAttribute("CodeValue") CodeValueVO codeValueVO, @RequestParam("type") String type, Model model) {
 		// 임시로 회사 ID를 1로 세팅
 		codeValueVO.setCompanyId(1);
-		codeValueVO.setUsingYn(request.getParameter("usingYn") != null ? "Y" : "N");
-	    codeValueVO.setDefaultYn(request.getParameter("defaultYn") != null ? "Y" : "N");
+		//체크박스는 체크하면 값이 오고, 체크하지 않으면 null
+	    codeValueVO.setUsingYn(codeValueVO.getUsingYn() != null ? "Y" : "N");
+	    codeValueVO.setDefaultYn(codeValueVO.getDefaultYn() != null ? "Y" : "N");
+	    // 기본값으로 등록했으면 다른 기본값은 모두 N로 변경
+	    if ("Y".equals(codeValueVO.getDefaultYn())) {
+	        codeValueService.resetAllDefaultYn(type); 
+	    }
+	    
 		codeValueService.addCodeValue(codeValueVO, type);
 		return "redirect:codeValueList";
 	}
 
 	// 수정 양식
 	@GetMapping("codeUpdate")
+	// CNO=수정할 코드의 번호(ID), TYPE=작업분류인지, 일감 우선순위인지 구분하는 값
 	public String codeUpdateForm(@RequestParam("cno") String cno, @RequestParam("type") String type, Model model) {
 		CodeValueVO vo = new CodeValueVO();
+		//type에 따라 ID 저장
 		if ("work".equals(type)) {
 	        vo.setTaskClassificationId(cno);
 	    } else {
@@ -359,6 +373,18 @@ public class SystemController {
 		codeValueService.modifyCodeValue(codeValueVO, type);
 	    return "redirect:codeValueList";
 	}
+	
+	// 수정 (드래그 앤 드랍으로 순서 변경한 데이터 저장)
+	//@PostMapping("/updateOrder")
+	//@ResponseBody // AJAX 요청을 위한 어노테이션
+	//public String updateOrderProcess(@RequestParam("type") String type, @RequestParam("orderData") String orderData) {
+	//    String[] idArray = orderData.split(",");
+	//    List<Long> sortedIds = Arrays.stream(idArray)
+	//                                 .map(Long::parseLong)
+	//                                 .collect(Collectors.toList());
+	//    codeValueService.updateOrder(type, sortedIds);    
+	//    return "SUCCESS";
+	//}
 
 	// -------------------------------프로젝트------------------------------
 	
@@ -499,4 +525,61 @@ public class SystemController {
 	// 역할 등록 처리
 	
 	// 역할 삭제
+	
+	// -------------------------------전체 소요시간------------------------------
+	private final SelectTotalTimeService selectTotalTimeService;
+	
+	// 전체조회
+	@GetMapping("totalTimeList")
+	public String totalTimeList(Model model) {
+		List<SelectTotalTimeVO> list = selectTotalTimeService.findSelectTotalTimeAll();
+		model.addAttribute("totalTimeList", list);
+		model.addAttribute("sidebarMenu", "time");
+		return "weple/time/all-total";
+	}
+	
+	// 등록 폼
+	@GetMapping("/insertTotalTime")
+	public String insertTotalTimeForm(Model model) {
+		SystemProjectVO vo = new SystemProjectVO();
+		vo.setStatus("ACTIVE");
+	    
+	    model.addAttribute("projectList", systemProjectService.selectProjectList(vo));
+	    //model.addAttribute("taskList", taskService.findAll()); 
+	    model.addAttribute("workClassList", codeValueService.findCodeValueAll());
+	    model.addAttribute("user", userService.findGroupUserAll());
+	    
+	    return "weple/time/insert";
+	}
+	
+	//등록 처리
+	@PostMapping("/insertTotalTime")
+	public String insertTotalTimeProcess(SelectTotalTimeVO selectTotalTimeVO) {
+		selectTotalTimeService.addSelectTotalTime(selectTotalTimeVO);
+		return "redirect:/totalTimeList";
+	}
+	
+	// 수정 폼
+	@GetMapping("/updateTotalTime")
+    public String modifyTotalTimeForm(@RequestParam("workId") long workId, Model model) {
+        //SelectTotalTimeVO vo = selectTotalTimeService.modifySelectTotalTime(workId);
+        //model.addAttribute("totalTime", vo);
+        return "weple/time/insert";
+    }
+	
+	// 수정 처리
+	@PostMapping("/updateTotalTime")
+    public String modifyTotalTimeProcess(SelectTotalTimeVO selectTotalTimeVO) {
+        selectTotalTimeService.modifySelectTotalTime(selectTotalTimeVO);
+        return "redirect:/totalTimeList";
+    }
+	
+	// 삭제
+	@GetMapping("/deleteTotalTime")
+    public String deleteWork(@RequestParam("workId") long workId) {
+		long result = selectTotalTimeService.removeSelectTotalTime(workId);
+	    System.out.println("삭제 시도 ID: " + workId + ", 결과: " + result);
+        return "redirect:/totalTimeList";
+    }
+		
 }
