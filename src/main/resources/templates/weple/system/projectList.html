@@ -77,11 +77,15 @@
 						    </span>
 						</td>
                         <td>
-                            <form th:action="@{/system/project/delete}" method="post" class="delete-form">
-                                <input type="hidden" name="projectId" th:value="${project.projectId}">
-                                <button type="button" class="delete-btn delete-project-btn">삭제</button>
-                            </form>
-                        </td>
+						    <div class="action-btn-group">
+						        <a th:href="@{/system/project/update/{id}(id=${project.projectId})}"
+						           class="edit-btn">수정</a>
+						        <form th:action="@{/system/project/delete}" method="post" class="delete-form">
+						            <input type="hidden" name="projectId" th:value="${project.projectId}">
+						            <button type="button" class="delete-btn delete-project-btn">삭제</button>
+						        </form>
+						    </div>
+						</td>
                     </tr>
                 </tbody>
             </table>

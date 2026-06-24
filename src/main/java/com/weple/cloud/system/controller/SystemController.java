@@ -1,5 +1,6 @@
 package com.weple.cloud.system.controller;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -431,8 +432,39 @@ public class SystemController {
 			return "weple/system/projectCreate";
 		}
 	}
+	
+	// 프로젝트 수정
+	@GetMapping("/system/project/update/{projectId}")
+	public String projectUpdateForm(
+			@PathVariable String projectId,
+	        Model model){
+				
+				SystemProjectVO project = systemProjectService.selectProjectById(Long.parseLong(projectId));
+				
+				model.addAttribute("project", project);
+				model.addAttribute("sidebarMenu", "system");
+				model.addAttribute("currentMenu", "systemproject");
+				
+				return "weple/system/projectUpdate";
+			}
+	        
+	@PostMapping("/system/project/update")
+	public String projectUpdateProcess(
+			SystemProjectVO projectVO,
+			RedirectAttributes redirectAttributes) {
 		
-
+		int result = systemProjectService.updateProject(projectVO);
+		
+		if(result > 0) {
+			redirectAttributes.addFlashAttribute("toastMessage", "프로젝트가 수정되었습니다.");
+			return "redirect:/system/project/list";
+		} else {
+			redirectAttributes.addFlashAttribute("toastError", "프로젝트 수정에 실패했습니다.");
+			return "redirect:/system/project/update/"+projectVO.getProjectId();
+		}
+		
+	}
+	
 	// 프로젝트 삭제
 	@PostMapping("/system/project/delete")
 	public String deleteProject(
