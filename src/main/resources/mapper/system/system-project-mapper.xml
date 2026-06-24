@@ -118,6 +118,8 @@
         ) t
     </insert>
     
+    <!-- 프로젝트 단건 조회 -->
+    
     <!-- 프로젝트 수정 -->
     <update id="updateProject" parameterType="com.weple.cloud.system.service.SystemProjectVO">
     	UPDATE project
