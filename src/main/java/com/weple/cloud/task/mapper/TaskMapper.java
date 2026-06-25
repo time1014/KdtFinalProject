@@ -44,5 +44,7 @@ public interface TaskMapper {
     public void deleteTask(@Param("tId") String tId);
     
     public List<TaskCommentVO>taskCommentList(@Param("tId") String tId);
+    
+    public Long getMilestoneIdByTaskId(@Param("tId") String tId);
 
 }
