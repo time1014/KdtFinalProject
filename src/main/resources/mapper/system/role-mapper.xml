@@ -29,12 +29,12 @@
 	<select id="selectPermissionList" resultType="com.weple.cloud.system.service.PermissionVO">
 		SELECT p.permission_code,
 			   p.permission_tag,
-			   p.permission_name
-			   c.default_describe AS tagLable
+			   p.permission_name,
+			   c.default_describe AS tagLabel
 		FROM permissions p
 		LEFT JOIN common_code c
 			   ON p.permission_tag = c.common_id
-			  AND c.common_code = "0K"
+			  AND c.common_code = '0K'
 		ORDER BY p.permission_tag, p.permission_code
 	</select>
 	

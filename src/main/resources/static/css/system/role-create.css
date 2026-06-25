@@ -1,108 +1,152 @@
-.role-create-page{
-    padding:20px;
+/* ===================== 역할 등록/수정 페이지 ===================== */
+.role-create-page {
+    padding: 20px 25px;
+    min-height: 100vh;
 }
 
-.role-create-card{
-    background:#fff;
-    border:1px solid #e5e7eb;
-    border-radius:10px;
-    padding:25px;
+.role-create-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px 32px;
+    border: 1px solid #e5e9f0;
+    box-shadow: 0 1px 6px rgba(0,0,0,.04);
 }
 
-.role-create-title{
-    font-size:20px;
-    font-weight:700;
-    margin-bottom:25px;
+.role-create-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+    margin: 0 0 16px 4px;
 }
 
-.form-group-row{
-    margin-bottom:20px;
+/* ── 섹션 한 줄 ── */
+.perm-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
 }
 
-.form-label{
-    display:block;
-    margin-bottom:8px;
-    font-size:13px;
-    font-weight:600;
+/* ── 보라색 번호 뱃지 ── */
+.perm-badge {
+	 display: none; 
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: #5a62d5;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 13px;
 }
 
-.form-input-text{
-    width:100%;
-    height:42px;
-    padding:0 14px;
-
-    border:1px solid #dcdfe4;
-    border-radius:6px;
+/* ── 권한 박스 ── */
+.perm-box {
+    flex: 1;
+    border: none;
+    border-bottom: 1px solid #eaeef4;       
+    border-radius: 0;           
+    padding: 10px 0 24px;  
+    background: transparent;
 }
 
-.permission-block{
-    border:1px solid #e5e7eb;
-    border-radius:8px;
-    margin-bottom:12px;
-    overflow:hidden;
+/* 역할 이름 박스: 세로 배치 */
+.name-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.permission-title{
-    background:#fafafa;
-    border-bottom:1px solid #e5e7eb;
-
-    padding:12px 16px;
-
-    font-size:13px;
-    font-weight:700;
+/* 박스 내 라벨 */
+.perm-box-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4b525a;
+    margin-bottom: 10px;
 }
 
-.permission-list{
-    display:flex;
-    flex-wrap:wrap;
-
-    gap:16px 40px;
-
-    padding:16px;
+.name-box .perm-box-label {
+    margin-bottom: 0;
 }
 
-.permission-item{
-    min-width:220px;
-
-    display:flex;
-    align-items:center;
-
-    gap:6px;
-
-    font-size:13px;
+/* 역할 이름 입력 */
+.role-name-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+     background: #fff;
+    color: #111;
+    transition: border-color .2s;
+}
+.role-name-input:focus {
+    border-color: #4d84ff;
+    box-shadow: 0 0 0 3px rgba(77, 132, 255, 0.1);
+    outline: none;
 }
 
-.permission-item input{
-    width:15px;
-    height:15px;
-
-    accent-color:#4d84ff;
+/* ── 체크박스 가로 나열 ── */
+.perm-checks {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(180px, max-content)); 
+    
+    gap: 12px 40px; 
+    width: 100%;
 }
 
-.button-group-right{
-    display:flex;
-    justify-content:flex-end;
-
-    gap:10px;
-
-    margin-top:25px;
+.perm-check-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    user-select: none;
+    min-width: 0; 
 }
 
-.page-btn{
-    min-width:90px;
-    height:40px;
-
-    border-radius:6px;
-    cursor:pointer;
+.perm-check-item input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: #4d84ff;
+    flex-shrink: 0;
 }
 
-.btn-cancel{
-    border:1px solid #dcdfe4;
-    background:#fff;
+/* ── 버튼 영역 ── */
+.btn-area {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f3f5;
 }
 
-.btn-submit{
-    border:none;
-    background:#4d84ff;
-    color:#fff;
+.page-btn {
+    min-width: 90px;
+    height: 40px;
+    padding: 0 22px;
+    font-size: 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+}
+.page-btn:hover { opacity: .88; }
+
+.btn-cancel {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #6b7280;
+}
+
+.btn-submit {
+    border: none;
+    background: #4d84ff;
+    color: #fff;
 }
