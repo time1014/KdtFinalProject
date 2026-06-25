@@ -271,5 +271,10 @@
 </select>
 
 
+<select id="getMilestoneIdByTaskId" resultType="Long">
+	SELECT milestone_id 
+	FROM task 
+	WHERE task_id = #{tId}
+</select>
 
 </mapper>
