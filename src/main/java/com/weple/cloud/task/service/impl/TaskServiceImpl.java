@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.weple.cloud.file.FileInfoVO;
 import com.weple.cloud.file.FileVO;
 import com.weple.cloud.file.mapper.FileMapper;
+import com.weple.cloud.milestone.mapper.MilestoneMapper;
 import com.weple.cloud.task.mapper.TaskMapper;
 import com.weple.cloud.task.service.TaskHistoryDTO;
 import com.weple.cloud.task.service.TaskHistoryDetailDTO;
@@ -38,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 public class TaskServiceImpl implements TaskService {
 	private final FileMapper fileMapper;
 	private final TaskMapper taskMapper;
+	private final MilestoneMapper milestoneMapper;
 	
 	@Value("${file.upload.task-dir}")
     private String uploadDir;
@@ -129,6 +131,12 @@ public class TaskServiceImpl implements TaskService {
             
             fileMapper.insertFileInfo(fileInfoVO);
         }
+        
+        // insert 성공하고, milestoneId 값이 null 이 아닐경우 ->  마일스톤 상태값 변경하기 (일감 진척도에 따른 마일스톤 상태[진행 중/완료] 체크)
+        if (result > 0 && taskVO.getMilestoneId() != null) {
+            syncMilestoneStatus(taskVO.getMilestoneId());
+        }
+        
         return result;
     }
 
@@ -187,6 +195,11 @@ public class TaskServiceImpl implements TaskService {
 
 	    // 기존 일감 정보 업데이트
 	    taskMapper.updateTask(taskVO);
+
+	    // milestoneId 값이 있을 경우 -> 마일스톤 상태 변경하기 (진척도==100% -> closed, 진척도 < 100% -> active) 
+	    if (taskVO.getMilestoneId() != null) {
+	        syncMilestoneStatus(taskVO.getMilestoneId());
+	    }
 	    
 	    // 추가된 파일이 존재할 경우 업로드 및 버전 관리 진행 (기존 코드 유지)
 	    if (files != null && !files.isEmpty()) {
@@ -242,8 +255,19 @@ public class TaskServiceImpl implements TaskService {
 	}
 	// 일감 삭제
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void deleteTask(String tId) {
+		
+		// 1. 삭제 전 해당 일감의 마일스톤 ID 조회
+	    Long milestoneId = taskMapper.getMilestoneIdByTaskId(tId);
+	    
+	    // 2. 일감 삭제
 		taskMapper.deleteTask(tId);
+		
+		// 3. 마일스톤이 있었다면 상태 동기화
+	    if (milestoneId != null) {
+	        syncMilestoneStatus(milestoneId);
+	    }
 	}
 	//댓글 목록 조회
 	@Override
@@ -306,6 +330,11 @@ public class TaskServiceImpl implements TaskService {
 	public List<TaskSpentTimeVO> taskSpentTime(String tId) {
 		
 		return taskMapper.taskSpentTime(tId);
-	}
+	
+	private void syncMilestoneStatus(Long milestoneId) {
+	    if (milestoneId != null && milestoneId > 0) {
+	        milestoneMapper.updateMilestoneStatusByTaskProgress(milestoneId);
+	    }
+	
+}}
 
-}

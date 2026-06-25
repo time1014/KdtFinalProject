@@ -58,5 +58,6 @@ public interface TaskMapper {
     
     public List<TaskSpentTimeVO> taskSpentTime(@Param("tId") String tId);
 
+    public Long getMilestoneIdByTaskId(@Param("tId") String tId);
 
 }

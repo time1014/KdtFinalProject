@@ -272,6 +272,11 @@
 </select>
 
 
+<select id="getMilestoneIdByTaskId" resultType="Long">
+	SELECT milestone_id 
+	FROM task 
+	WHERE task_id = #{tId}
+</select>
 
 <!--
 댓글 아이디 자동 시퀀스 + pl sql 
