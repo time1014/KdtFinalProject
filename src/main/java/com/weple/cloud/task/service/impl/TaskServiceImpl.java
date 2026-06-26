@@ -23,6 +23,7 @@ import com.weple.cloud.task.service.TaskHistoryDetailDTO;
 import com.weple.cloud.task.service.TaskMemberVO;
 import com.weple.cloud.task.service.TaskMilestoneVO;
 import com.weple.cloud.task.service.TaskParentVO;
+import com.weple.cloud.task.service.TaskPermissionVO;
 import com.weple.cloud.task.service.TaskPriorityVO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskService;
@@ -351,6 +352,17 @@ public class TaskServiceImpl implements TaskService {
 	public List<TaskMemberVO> findAllMemberList() {
 		
 		return taskMapper.allMemberList();
+	}
+	@Override
+	public TaskPermissionVO getTaskPermissions(String userCode, Long pId) {
+		TaskPermissionVO permissions = taskMapper.checkTaskPermissions(userCode, pId);
+		
+		// 권한 하나도 없어서 null 일때 타임리프에서 널포인터예외 뜨는거 빈객체 생성으로 방지
+		if (permissions == null) {
+            return new TaskPermissionVO(); 
+        }
+        
+        return permissions;
 	}
 	}
 

@@ -25,6 +25,7 @@ import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.task.service.TaskCommentVO;
 import com.weple.cloud.task.service.TaskHistoryDTO;
 import com.weple.cloud.task.service.TaskMemberVO;
+import com.weple.cloud.task.service.TaskPermissionVO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskService;
 import com.weple.cloud.task.service.TaskSpentTimeVO;
@@ -55,12 +56,33 @@ public class TaskController {
 	        @RequestParam(value = "dueDate", required = false) List<String> dueDate,
 	        Model model, 
 	        @AuthenticationPrincipal LoginUserDetails loginUser) {
-	    
+		
+		Integer ownerYn = loginUser.getLoginUser().getOwnerYn();
+	    Integer adminYn = loginUser.getLoginUser().getAdminYn();
+	    String userCode = loginUser.getLoginUser().getUserCode();
 	    Long companyId = loginUser.getLoginUser().getCompanyId();
+	    TaskPermissionVO taskPerms = taskService.getTaskPermissions(userCode, pId);
+		// 로그인 확인
+		if (loginUser == null || loginUser.getLoginUser() == null) {
+			return "weple/access-denide";
+		}
+
 	    
+	    // 관리자 권한을 가지고 있는지
+	    boolean isAdminOrOwner = (ownerYn != null && ownerYn == 1) || (adminYn != null && adminYn == 1);
+
+		// 🚨 [권한 체크] 프로젝트 구성원 확인
+		// (MemberVO는 실제 사용하는 타입으로 변경해주세요)
+		List<TaskMemberVO> memberList = taskService.findMember(pId);
+		boolean isProjectMember = memberList.stream()
+				.anyMatch(member -> userCode.equals(member.getUserCode()));
+		
+		if (!isProjectMember && !isAdminOrOwner) {
+			return "weple/access-denide"; // 구성원이 아니면 접근 불가 페이지 리턴
+		}
 
 	    Map<String, Object> filterParams = new HashMap<>();
-	    filterParams.put("tManager", loginUser.getLoginUser().getUserCode());
+	    filterParams.put("tManager", userCode); // loginUser.getLoginUser().getUserCode() 대신 미리 꺼내둔 변수 사용
 	    filterParams.put("projectId", pId);
 	    filterParams.put("searchKeyword", searchKeyword);
 	    filterParams.put("typeIds", typeIds);
@@ -73,6 +95,7 @@ public class TaskController {
 
 	    List<TaskVO> list = taskService.findAllWithFilters(filterParams);
 	    model.addAttribute("projectId", pId);
+	    model.addAttribute("loginUserCode", userCode);
 	    model.addAttribute("project", projectService.findById(String.valueOf(pId)));
 	    model.addAttribute("sidebarMenu", "project");
 	    model.addAttribute("currentMenu", "task");
@@ -80,40 +103,76 @@ public class TaskController {
 	    // 필터 목록 VO
 	    model.addAttribute("typeList", taskService.findType(companyId));
 	    model.addAttribute("statusList", taskService.findStatus());
-	    model.addAttribute("memberList", taskService.findMember(pId)); 
+	    model.addAttribute("memberList", memberList); // 권한 체크 시 불러온 목록 재사용
 	    model.addAttribute("priorityList", taskService.findPriority(companyId));
 	    model.addAttribute("parentTaskList", taskService.findParent(pId));
-	    
 	    model.addAttribute("taskListinfo", list);
+	    model.addAttribute("taskPerms", taskPerms); // 일감관련 가지고있는 권한
+	    model.addAttribute("isAdminOrOwner" , isAdminOrOwner);
+
 	    
 	    return "weple/task/list";
 	}
 	
 	//일감 등록 페이지 로드 + 선택 목록 값 로드
 	@GetMapping("/project/task/insert")
-    public String projectTaskListInsert(@RequestParam("projectId") Long pId,@AuthenticationPrincipal LoginUserDetails loginUser,Model model) {
-		String userCode = loginUser.getLoginUser().getUserCode();
-	    Long companyId = loginUser.getLoginUser().getCompanyId();
-	    
-	    //nav 일감 돌아가기 위해서 projectId 넘김
-		model.addAttribute("projectId",pId);
-	    //내게 할당에서 현재 로그인 정보 확인
-	    model.addAttribute("loginUserCode",userCode);
+	public String projectTaskListInsert(@RequestParam("projectId") Long pId, 
+			@AuthenticationPrincipal LoginUserDetails loginUser, 
+			Model model) {
+		// 로그인 확인
+		if (loginUser == null || loginUser.getLoginUser() == null) {
+			return "weple/access-denide";
+		}
 		
+		
+		Integer ownerYn = loginUser.getLoginUser().getOwnerYn();
+		Integer adminYn = loginUser.getLoginUser().getAdminYn();
+		String userCode = loginUser.getLoginUser().getUserCode();
+		Long companyId = loginUser.getLoginUser().getCompanyId();
+		
+		// 최고 권한(소유자/관리자) 확인
+				boolean isAdminOrOwner = (ownerYn != null && ownerYn == 1) || (adminYn != null && adminYn == 1);
+			    
+				// 프로젝트 구성원 확인
+				List<TaskMemberVO> memberList = taskService.findMember(pId);
+				boolean isProjectMember = memberList.stream()
+						.anyMatch(member -> userCode.equals(member.getUserCode()));
+
+				// 최고 관리자도 아니고, 프로젝트 구성원도 아니라면 무조건 즉시 차단
+				if (!isAdminOrOwner && !isProjectMember) {
+					return "weple/access-denide";
+				}
+
+				//  세부 기능 권한(k3Add) 확인
+				TaskPermissionVO taskPerms = taskService.getTaskPermissions(userCode, pId);
+				boolean isInsertAble = (taskPerms != null && taskPerms.getK3Add() != null);
+
+				// 최고 관리자가 아닌 일반 멤버인데, 일감 등록 권한(k3Add)이 없다면 차단
+				// (최고 관리자/소유자는 k3Add 권한이 없어도 마스터 권한으로 통과)
+				if (!isAdminOrOwner && !isInsertAble) {
+					return "weple/access-denide";
+				}
+
+	    // nav 일감 돌아가기 위해서 projectId 넘김
+		model.addAttribute("projectId", pId);
+	    // 내게 할당에서 현재 로그인 정보 확인
+	    model.addAttribute("loginUserCode", userCode);
 		
 		model.addAttribute("currentMenu", "task");
 		// 일감유형
 		model.addAttribute("typeList", taskService.findType(companyId));
-	    //일감상태
+	    // 일감상태
 	    model.addAttribute("statusList", taskService.findStatus());
-	    //프로젝트 참여 인원
-	    model.addAttribute("memberList", taskService.findMember(pId)); 
-	    //우선순위
-	    model.addAttribute("priorityList",taskService.findPriority(companyId));
-	    //부모 일감 리스트 (상위 일감 선택용)
+	    // 프로젝트 참여 인원 (권한 체크 시 불러온 목록 재사용)
+	    model.addAttribute("memberList", memberList); 
+	    // 우선순위
+	    model.addAttribute("priorityList", taskService.findPriority(companyId));
+	    // 부모 일감 리스트 (상위 일감 선택용)
 	    model.addAttribute("parentTaskList", taskService.findParent(pId));
 	    
 	    model.addAttribute("milestoneList", taskService.findMilestone(pId));
+
+	    
         return "weple/task/register";
     }
 	
@@ -141,29 +200,44 @@ public class TaskController {
 	
 	//일감 상세조회 값 로드
 	@GetMapping("/project/task/detail/{tId}")
-	public String taskDetail(@PathVariable("tId") String tId,@RequestParam("projectId") Long pId,@AuthenticationPrincipal LoginUserDetails loginUser,Model model,TaskVO taskVO) {
-			
-
+	public String taskDetail(@PathVariable("tId") String tId, @RequestParam("projectId") Long pId, @AuthenticationPrincipal LoginUserDetails loginUser, Model model, TaskVO taskVO) {
+		if (loginUser == null || loginUser.getLoginUser() == null) {
+			return "weple/access-denide";
+		}
+		Integer ownerYn = loginUser.getLoginUser().getOwnerYn();
+		Integer adminYn = loginUser.getLoginUser().getAdminYn();
+		String userCode = loginUser.getLoginUser().getUserCode();
+		// 로그인 확인
 		
+
+		// 관리자 권한을 가지고 있는지
+		boolean isAdminOrOwner = (ownerYn != null && ownerYn == 1) || (adminYn != null && adminYn == 1);
+
+		// 🚨 [권한 체크] 프로젝트 구성원 확인
+		List<TaskMemberVO> memberList = taskService.findMember(pId);
+		boolean isProjectMember = memberList.stream()
+				.anyMatch(member -> userCode.equals(member.getUserCode()));
+		
+		if (!isProjectMember&& !isAdminOrOwner) {
+			return "weple/access-denide";
+		}
+		TaskPermissionVO taskPerms = taskService.getTaskPermissions(userCode, pId);
 		TaskVO taskDetail = taskService.findTaskDetail(tId);
 		List<TaskCommentVO> taskComment = taskService.findTaskComment(tId);
 		List<TaskVO> childTaskList = taskService.findChildTask(tId);
 		List<TaskHistoryDTO> updateHistoryList = taskService.taskUpdateHistory(tId);
-		List<TaskSpentTimeVO>spentTimeList = taskService.taskSpentTime(tId);
+		List<TaskSpentTimeVO> spentTimeList = taskService.taskSpentTime(tId);
 		
-		if (loginUser != null && loginUser.getLoginUser() != null) {
-	        model.addAttribute("currentUserCode", loginUser.getLoginUser().getUserCode());
-	    } else {
-	        model.addAttribute("currentUserCode", null);
-	    }
-		
+		model.addAttribute("currentUserCode", userCode);
 		model.addAttribute("currentMenu", "task");
-		model.addAttribute("projectId",pId);
-		model.addAttribute("taskDetail",taskDetail);
-		model.addAttribute("chlidTaskList",childTaskList);
-		model.addAttribute("taskComment" , taskComment);
-		model.addAttribute("updateHistoryList",updateHistoryList);
+		model.addAttribute("projectId", pId);
+		model.addAttribute("taskDetail", taskDetail);
+		model.addAttribute("chlidTaskList", childTaskList);
+		model.addAttribute("taskComment", taskComment);
+		model.addAttribute("updateHistoryList", updateHistoryList);
 		model.addAttribute("spentTimeList", spentTimeList);
+		model.addAttribute("taskPerms",taskPerms);
+		model.addAttribute("isAdminOrOwner",isAdminOrOwner);
 		return "weple/task/detail";
 	}
 	
@@ -264,6 +338,9 @@ public class TaskController {
 
 	    List<TaskProjectSelectVO> projectList = taskService.findMyProject(userCode);
 	    List<TaskMemberVO> allMemberList = taskService.findAllMemberList();
+	    TaskPermissionVO taskPerms = taskService.getTaskPermissions(userCode, null);
+	    boolean isAdminOrOwner = (ownerYn != null && ownerYn == 1) || (adminYn != null && adminYn == 1);
+	    model.addAttribute("isAdminOrOwner", isAdminOrOwner); // 화면 제어용 변수 추가
 
 	    model.addAttribute("sidebarMenu", "task");
 	    model.addAttribute("allList", taskService.findAllMyTasksWithFilters(allParams));
@@ -272,9 +349,10 @@ public class TaskController {
 	    model.addAttribute("statusList", taskService.findStatus());
 	    model.addAttribute("priorityList", taskService.findPriority(companyId));
 	    model.addAttribute("allMemberList" , allMemberList);
+	    model.addAttribute("loginUserCode", userCode);
+	    model.addAttribute("taskPerms", taskPerms); // 일감관련 가지고있는 권한
+	    model.addAttribute("isAdminOrOwner" , isAdminOrOwner);
 	    
-	    boolean isAdminOrOwner = (ownerYn != null && ownerYn == 1) || (adminYn != null && adminYn == 1);
-	    model.addAttribute("isAdminOrOwner", isAdminOrOwner); // 화면 제어용 변수 추가
 
 	    if (isAdminOrOwner) {
 	        model.addAttribute("allList", taskService.findAllList(allParams));
@@ -286,36 +364,80 @@ public class TaskController {
 	
 	// 프로젝트 내부 수정 페이지 로드 + 선택 값 목록 로드 + 기존값 로드
 	@GetMapping("/project/task/update/{tId}")
-	public String taskUpdateForm(@PathVariable("tId") String tId, @RequestParam("projectId") Long pId, @AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
-		
-		String userCode = loginUser.getLoginUser().getUserCode();
+	public String taskUpdateForm(@PathVariable("tId") String tId,
+	        @RequestParam("projectId") Long pId,
+	        @AuthenticationPrincipal LoginUserDetails loginUser,
+	        Model model) {
+
+	    // 로그인 확인
+	    if (loginUser == null || loginUser.getLoginUser() == null) {
+	        return "weple/access-denide";
+	    }
+
+	    Integer ownerYn = loginUser.getLoginUser().getOwnerYn();
+	    Integer adminYn = loginUser.getLoginUser().getAdminYn();
+	    String userCode = loginUser.getLoginUser().getUserCode();
 	    Long companyId = loginUser.getLoginUser().getCompanyId();
-	    
+
+	    // 최고 관리자 여부
+	    boolean isAdminOrOwner =
+	            (ownerYn != null && ownerYn == 1) ||
+	            (adminYn != null && adminYn == 1);
+
+	    // 프로젝트 멤버 확인
+	    List<TaskMemberVO> memberList = taskService.findMember(pId);
+
+	    boolean isProjectMember = memberList.stream()
+	            .anyMatch(member -> userCode.equals(member.getUserCode()));
+
+	    if (!isProjectMember && !isAdminOrOwner) {
+	        return "weple/access-denide";
+	    }
+
+	    // 수정할 일감 조회
 	    TaskVO taskDetail = taskService.findTaskDetail(tId);
-	    
-	    //nav 일감 돌아가기 위해서 projectId 넘김
+
+	    // 수정 권한 조회
+	    TaskPermissionVO taskPerms = taskService.getTaskPermissions(userCode, pId);
+
+	    boolean canEditAll =
+	            taskPerms != null && taskPerms.getK3Edit() != null;
+
+	    boolean canEditMine =
+	            taskPerms != null && taskPerms.getK3Myedit() != null;
+
+	    // 내 일감인지 확인
+	    boolean isMyTask =
+	            userCode.equals(taskDetail.getTaskManagerId());
+	    System.out.println("여기" + taskDetail.getTaskManagerId());
+
+	    // 권한 체크
+	    if (!isAdminOrOwner) {
+
+	        // 전체 수정 권한도 없고
+	        if (!canEditAll) {
+
+	            // 내 일감 수정 권한도 없거나,
+	            // 내 일감 수정 권한은 있지만 내 일감이 아니면 차단
+	            if (!canEditMine || !isMyTask) {
+	                return "weple/access-denide";
+	            }
+	        }
+	    }
+
 	    model.addAttribute("currentMenu", "task");
-	    model.addAttribute("projectId",pId);
-	    // 수정할 기존값 넘김
-	    model.addAttribute("taskDetail",taskDetail);
-	    model.addAttribute("loginUserCode",userCode);
-		
-		// 일감유형
-		model.addAttribute("typeList", taskService.findType(companyId));
-	    //일감상태
+	    model.addAttribute("projectId", pId);
+	    model.addAttribute("taskDetail", taskDetail);
+	    model.addAttribute("loginUserCode", userCode);
+
+	    model.addAttribute("typeList", taskService.findType(companyId));
 	    model.addAttribute("statusList", taskService.findStatus());
-	    //프로젝트 참여 인원
-	    model.addAttribute("memberList", taskService.findMember(pId)); 
-	    //우선순위
-	    model.addAttribute("priorityList",taskService.findPriority(companyId));
-	    //부모 일감 리스트 (상위 일감 선택용)
+	    model.addAttribute("memberList", memberList);
+	    model.addAttribute("priorityList", taskService.findPriority(companyId));
 	    model.addAttribute("parentTaskList", taskService.findParent(pId));
-	    
 	    model.addAttribute("milestoneList", taskService.findMilestone(pId));
-	    
-	    System.out.println(taskDetail);
-	    
-	    return "weple/task/fragment-edit"; // 생성한 수정 페이지 HTML 경로
+
+	    return "weple/task/fragment-edit";
 	}
 
 	// 일감 수정 처리 
@@ -382,24 +504,33 @@ public class TaskController {
 	
 	// 댓글만 ajax 목록 다시 불러오기
 	@GetMapping("/api/task/comments/fragment/{tId}")
-	public String getCommentFragment(@PathVariable("tId") String tId, Model model, @AuthenticationPrincipal LoginUserDetails loginUser) {
+	public String getCommentFragment(@PathVariable("tId") String tId,@RequestParam("projectId") Long pId,  Model model, @AuthenticationPrincipal LoginUserDetails loginUser) {
 		String userCode = loginUser.getLoginUser().getUserCode();
+		if (loginUser != null && loginUser.getLoginUser() != null) {
+	        model.addAttribute("currentUserCode", userCode);
+	    } else {
+	        model.addAttribute("currentUserCode", null);
+	    }
+		
+		
+	    Integer ownerYn = loginUser.getLoginUser().getOwnerYn();
+	    Integer adminYn = loginUser.getLoginUser().getAdminYn();
 	    // 최신 댓글 목록 다시 조회
 	    List<TaskCommentVO> taskComment = taskService.findTaskComment(tId);
 	    model.addAttribute("taskComment", taskComment);
 	    
 	    // 권한 처리를 위한 로그인 유저 코드 세팅
-	    if (loginUser != null && loginUser.getLoginUser() != null) {
-	        model.addAttribute("currentUserCode", userCode);
-	    } else {
-	        model.addAttribute("currentUserCode", null);
-	    }
+	    
+	    
+	    // ⭐ 중요: 렌더링(th:if)에 필요한 권한 데이터도 Model에 반드시 추가해야 합니다!
+	    // (아래 코드는 프로젝트 구조에 맞게 데이터를 가져와서 넣어주세요)
+	    boolean isAdminOrOwner = (ownerYn != null && ownerYn == 1) || (adminYn != null && adminYn == 1);
+	    TaskPermissionVO taskPerms = taskService.getTaskPermissions(userCode, pId);
+	    
+	    model.addAttribute("isAdminOrOwner", isAdminOrOwner);
+	    model.addAttribute("taskPerms", taskPerms);
 	    
 	    // commentArea 부분만 로드
 	    return "weple/task/detail :: #commentArea";
 	}
-	
-
-
-
 }

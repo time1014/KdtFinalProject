@@ -52,4 +52,6 @@ public interface TaskService {
 	public List<TaskVO> findAllMyTasksWithFilters(Map<String, Object> allParams);
 	
 	public List<TaskMemberVO> findAllMemberList();
+	
+	TaskPermissionVO getTaskPermissions(String userCode, Long pId);
 }

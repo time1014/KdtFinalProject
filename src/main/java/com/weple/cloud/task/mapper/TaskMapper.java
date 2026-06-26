@@ -9,6 +9,7 @@ import com.weple.cloud.task.service.TaskCommentVO;
 import com.weple.cloud.task.service.TaskMemberVO;
 import com.weple.cloud.task.service.TaskMilestoneVO;
 import com.weple.cloud.task.service.TaskParentVO;
+import com.weple.cloud.task.service.TaskPermissionVO;
 import com.weple.cloud.task.service.TaskPriorityVO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskSpentTimeVO;
@@ -68,5 +69,8 @@ public interface TaskMapper {
     public void updateHierarchicalProgress(@Param("taskId") String taskId);
     
     public List<TaskMemberVO> allMemberList();
+    
+    //일감 관련 권한 확인
+    TaskPermissionVO checkTaskPermissions(@Param("userCode") String userCode, @Param("pId") Long pId);
 
 }

@@ -466,7 +466,8 @@ END;
         u.user_name AS taskManager, 
         t.created_at AS createdAt,
         t.finish_date AS finishDate,
-        t.project_id AS projectId
+        t.project_id AS projectId,
+        t.task_manager AS taskManagerId
     FROM
         task t
     INNER JOIN
@@ -698,6 +699,25 @@ END;
         	AND t.deleted_yn = 'N'
   		)
 	ORDER BY u.user_name ASC
+</select>
+<select id="checkTaskPermissions" resultType="TaskPermissionVO">
+    SELECT
+        MAX(CASE WHEN rp.permission_code = 'k3_add' THEN 'k3_add' END) AS k3Add,
+        MAX(CASE WHEN rp.permission_code = 'k3_edit' THEN 'k3_edit' END) AS k3Edit,
+        MAX(CASE WHEN rp.permission_code = 'k3_delete' THEN 'k3_delete' END) AS k3Delete,
+        MAX(CASE WHEN rp.permission_code = 'k3_myedit' THEN 'k3_myedit' END) AS k3Myedit,
+        MAX(CASE WHEN rp.permission_code = 'k3_comment' THEN 'k3_comment' END) AS k3Comment
+    FROM members m
+    JOIN member_roles mr ON m.member_id = mr.member_id
+    JOIN roles r ON mr.role_id = r.role_id
+    JOIN role_permissions rp ON r.role_id = rp.role_id
+    WHERE m.user_code = #{userCode}
+
+    <if test="pId != null">
+        AND m.project_id = #{pId}
+    </if>
+
+    AND rp.permission_code IN ('k3_add', 'k3_edit', 'k3_delete', 'k3_myedit', 'k3_comment')
 </select>
 
 </mapper>

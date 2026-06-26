@@ -4,11 +4,13 @@
 	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
 <title>WEPLE</title>
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-    <link rel="stylesheet" th:href="@{/css/task/task-list.css}">
-    <link rel="stylesheet" th:href="@{/css/repository/repository.css}">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<link rel="stylesheet" th:href="@{/css/task/task-list.css}">
+<link rel="stylesheet" th:href="@{/css/repository/repository.css}">
 </head>
 <body>
 
@@ -82,16 +84,15 @@
 					</div>
 				</div>
 				<div class="filter-row" th:if="${isAdminOrOwner}">
-    <div class="filter-label label-manager">담당자</div>
-    <div class="filter-options">
-        <select id="memberChoices" name="memberIds" multiple>
-            <option th:each="member : ${allMemberList}" 
-                    th:value="${member.userCode}" 
-                    th:text="|${member.userName} (${member.email})|">
-            </option>
-        </select>
-    </div>
-</div>
+					<div class="filter-label label-manager">담당자</div>
+					<div class="filter-options">
+						<select id="memberChoices" name="memberIds" multiple>
+							<option th:each="member : ${allMemberList}"
+								th:value="${member.userCode}"
+								th:text="|${member.userName} (${member.email})|"></option>
+						</select>
+					</div>
+				</div>
 
 				<div class="filter-row">
 					<div class="filter-label label-progress">진척도</div>
@@ -208,15 +209,20 @@
 								<span class="more-options-btn" onclick="toggleDropdown(this)">•••</span>
 
 								<div class="dropdown-menu-box">
-									<button type="button" class="dropdown-item edit-btn"
+									<button class="dropdown-item edit-btn"
+										th:if="${isAdminOrOwner or taskPerms.k3Edit != null or (taskPerms.k3Myedit != null and task.taskManagerId == loginUserCode)}"
 										th:onclick="|location.href='@{/project/task/update/{id}(id=${task.taskId}, projectId=${task.projectId})}'|">
 										✏️ 편집</button>
 
-									<button type="button"
-										class="dropdown-item delete-btn task-delete-trigger"
+									<button class="dropdown-item delete-btn task-delete-trigger"
+										th:if="${isAdminOrOwner or taskPerms.k3Delete != null}"
 										th:data-task-id="${task.taskId}"
 										th:data-task-title="${task.taskTitle}"
 										th:data-project-id="${task.projectId}">🗑️ 삭제</button>
+									<span
+										th:unless="${isAdminOrOwner or taskPerms.k3Edit != null or (taskPerms.k3Myedit != null and task.taskManagerId == loginUserCode) or taskPerms.k3Delete != null}"
+										style="padding: 10px; color: #999; font-size: 13px; display: block; text-align: center; white-space: nowrap;">
+										접근 권한 없음 </span>
 								</div>
 							</div>
 						</td>
