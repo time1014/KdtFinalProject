@@ -13,7 +13,8 @@
 			u.user_name AS taskManager, 
 			t.created_at AS createdAt,
 			t.finish_date AS finishDate,
-			t.project_id AS projectId
+			t.project_id AS projectId,
+			t.estimated_time AS estimatedTime
 		FROM
 			task t
 		INNER JOIN
@@ -358,6 +359,7 @@ END;
 	WHERE task_id = #{tId}
 </select>
 
+
 <!-- 프로젝트 내부 일감 검색필터 포함 조회 -->
 <select id="findAllWithFilters" parameterType="map" resultType="TaskVO">
     SELECT
@@ -583,5 +585,10 @@ END;
     </where>
     ORDER BY t.created_at DESC
 </select>
+  
+  <!-- 소요시간의 진척도 자동계산 프로시저 - 민지 -->
+<update id="updateHierarchicalProgress" statementType="CALLABLE" parameterType="string">
+    { CALL UPDATE_PROGRESS_HIERARCHY(#{taskId}) }
+</update>
 
 </mapper>

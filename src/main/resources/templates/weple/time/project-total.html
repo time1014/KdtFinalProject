@@ -11,7 +11,10 @@
 		<div class="worktime-container">
 			<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
 			    <h3 style="margin: 0; font-size: 22px; font-weight: 700;">소요시간</h3>
-			    <button class="btn btn-primary" th:onclick="|location.href='@{/insertProjectTime}'|">+ 소요시간 등록</button>
+			    <button class="btn btn-primary" 
+				        th:onclick="|location.href='@{/insertProjectTime(projectId=${param.projectId != null ? param.projectId : ''})}'|">
+				    + 소요시간 등록
+				</button>
 			</div>
 
 			<!-- 검색 영역 -->

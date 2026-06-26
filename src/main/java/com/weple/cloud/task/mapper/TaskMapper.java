@@ -63,5 +63,8 @@ public interface TaskMapper {
     public List<TaskVO> findAllWithFilters(Map<String, Object> filterParams);
     
     public List<TaskVO> findAllMyTasksWithFilters(Map<String,Object>allParams);
+  
+  // 소요시간의 진척도 자동계산 프로시저 - 민지
+    public void updateHierarchicalProgress(@Param("taskId") String taskId);
 
 }
