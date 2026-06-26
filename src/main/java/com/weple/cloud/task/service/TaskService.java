@@ -1,11 +1,9 @@
 package com.weple.cloud.task.service;
 
 import java.util.List;
-
+import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
-
-import com.weple.cloud.history.task.service.TaskHistoryVO;
 
 public interface TaskService {
 	public List<TaskVO> findAll(Long pId);
@@ -48,4 +46,8 @@ public interface TaskService {
 	public List<TaskHistoryDTO> taskUpdateHistory(String tId);
     
     public List<TaskSpentTimeVO> taskSpentTime(String tId);
+    
+    public List<TaskVO> findAllWithFilters(Map<String, Object> filterParams);
+
+	public List<TaskVO> findAllMyTasksWithFilters(Map<String, Object> allParams);
 }

@@ -24,6 +24,7 @@ import com.weple.cloud.system.service.CodeValueService;
 import com.weple.cloud.system.service.CodeValueVO;
 import com.weple.cloud.system.service.GroupService;
 import com.weple.cloud.system.service.GroupUserService;
+import com.weple.cloud.system.service.PermissionVO;
 import com.weple.cloud.system.service.RoleService;
 import com.weple.cloud.system.service.RoleVO;
 import com.weple.cloud.system.service.SystemGroupUserVO;
@@ -195,13 +196,19 @@ public class SystemController {
 	public String systemTaskTypeList(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
 		Long companyId = loginUser.getLoginUser().getCompanyId();
 		List<TaskTypeVO> list = taskTypeService.findTaskTypeAll(companyId);
+		model.addAttribute("sidebarMenu", "system");
+		model.addAttribute("currentMenu", "taskType");
+		model.addAttribute("menu", "taskType");
 		model.addAttribute("taskTypes", list);
 		return "weple/system/taskType/list";
 	}
 
 	// 등록페이지 조회
 	@GetMapping("/system/taskType/insert")
-	public String taskTypeInsert() {
+	public String taskTypeInsert(Model model) {
+		model.addAttribute("sidebarMenu", "system");
+		model.addAttribute("currentMenu", "taskType");
+		model.addAttribute("menu", "taskType");
 		return "weple/system/taskType/register";
 	}
 
@@ -542,7 +549,7 @@ public class SystemController {
 	// 역할 등록 폼
 	@GetMapping("/system/role/create")
 	public String roleCreateForm(Model model) {
-		model.addAttribute("permissionList", roleService.selectPermissionList());
+		model.addAttribute("groupedPermissions", groupPermissions(roleService.selectPermissionList()));
 		model.addAttribute("mode", "create");
 		
 		model.addAttribute("sidebarMenu", "system");
@@ -555,7 +562,7 @@ public class SystemController {
 	public String roleEditForm(@RequestParam Long roleId, Model model) {
 		model.addAttribute("role", roleService.selectRoleById(roleId));
 		model.addAttribute("checkedCodes", roleService.selectPermissionCodesByRoleid(roleId));
-		model.addAttribute("permissionList", roleService.selectPermissionList());
+		model.addAttribute("groupedPermissions", groupPermissions(roleService.selectPermissionList()));
 		model.addAttribute("mode", "edit");
 		
 		model.addAttribute("sidebarMenu", "system");
@@ -585,7 +592,7 @@ public class SystemController {
 		if(result > 0) {
 			redirectAttributes.addFlashAttribute("toastMessage", "역할이 수정되었습니다.");
 		}
-		return "edirect:/system/role";
+		return "redirect:/system/role";
 	}
 	
 	// 역할 삭제
@@ -599,6 +606,22 @@ public class SystemController {
 		return "redirect:/system/role";
 	}
 	
+	// private 헬퍼: permissionList → tagLabel 기준 LinkedHashMap
+	private java.util.LinkedHashMap<String, java.util.List<PermissionVO>> groupPermissions(
+	        java.util.List<PermissionVO> permissionList) {
+
+	    java.util.LinkedHashMap<String, java.util.List<PermissionVO>> map =
+	            new java.util.LinkedHashMap<>();
+
+	    for (PermissionVO perm : permissionList) {
+	        // tagLabel(한글)이 없으면 permissionTag(k1~k7) 로 폴백
+	        String key = (perm.getTagLabel() != null && !perm.getTagLabel().isBlank())
+	                     ? perm.getTagLabel()
+	                     : perm.getPermissionTag();
+	        map.computeIfAbsent(key, k -> new java.util.ArrayList<>()).add(perm);
+	    }
+	    return map;
+	}
 
 	// ---------------------------- 사용자 관리 --------------------------
 	@Autowired
