@@ -22,59 +22,123 @@
 		</div>
 
 		<div class="filter-box">
-			<form id="searchForm" method="get">
+			<form id="searchForm" method="get" th:action="@{/project/task}">
+				<input type="hidden" name="projectId" th:value="${param.projectId}">
+
 				<div class="row" style="margin-bottom: 20px;">
 					<div class="col-md-4 col-md-offset-8">
 						<div class="input-group input-group-sm search-group">
 							<span class="input-group-addon">🔍</span> <input type="text"
-								class="form-control" placeholder="검색">
+								class="form-control" name="searchKeyword" placeholder="일감명 검색"
+								th:value="${param.searchKeyword}">
 						</div>
 					</div>
 				</div>
 
 				<div class="filter-row">
-					<div class="filter-label label-project">프로젝트</div>
-					<div class="filter-options">
-						<label><input type="checkbox"> 예담</label><label><input
-							type="checkbox"> 기획</label><label><input type="checkbox">
-							개발</label><label><input type="checkbox"> 디자인</label>
-					</div>
-				</div>
-				<div class="filter-row">
 					<div class="filter-label label-type">일감유형</div>
 					<div class="filter-options">
-						<label><input type="checkbox"> 기능개발</label><label><input
-							type="checkbox"> 결함/버그</label><label><input
-							type="checkbox"> 지원/문의</label><label><input
-							type="checkbox"> 개선</label>
+						<label th:each="type : ${typeList}"> <input
+							type="checkbox" name="typeIds" th:value="${type.typeId}"
+							th:checked="${param.typeIds != null and #arrays.contains(param.typeIds, #strings.toString(type.typeId))}">
+							<span th:text="${type.typeName}">기능개발</span>
+						</label>
 					</div>
 				</div>
+
 				<div class="filter-row">
 					<div class="filter-label label-status">상태</div>
 					<div class="filter-options">
-						<label><input type="checkbox"> 신규</label><label><input
-							type="checkbox"> 결함</label><label><input type="checkbox">
-							완료</label><label><input type="checkbox"> 예정</label>
+						<label th:each="taskStatus : ${statusList}"> <input
+							type="checkbox" name="statusIds"
+							th:value="${taskStatus.commonId}"
+							th:checked="${param.statusIds != null and #arrays.contains(param.statusIds, #strings.toString(taskStatus.commonId))}">
+							<span th:text="${taskStatus.defaultDescribe}">신규</span>
+						</label>
 					</div>
 				</div>
+
 				<div class="filter-row">
 					<div class="filter-label label-priority">우선순위</div>
 					<div class="filter-options">
-						<label><input type="checkbox"> 매우낮음</label><label><input
-							type="checkbox"> 낮음</label><label><input type="checkbox">
-							보통</label><label><input type="checkbox"> 높음</label>
+						<label th:each="priority : ${priorityList}"> <input
+							type="checkbox" name="priorityNames"
+							th:value="${priority.priorityName}"
+							th:checked="${param.priorityNames != null and #arrays.contains(param.priorityNames, priority.priorityName)}">
+							<span th:text="${priority.priorityName}">보통</span>
+						</label>
+					</div>
+				</div>
+
+				<div class="filter-row">
+					<div class="filter-label label-manager">담당자</div>
+					<div class="filter-options">
+						<label th:each="member : ${memberList}"> <input
+							type="checkbox" name="memberIds" th:value="${member.userCode}"
+							th:checked="${param.memberIds != null and #arrays.contains(param.memberIds, #strings.toString(member.userCode))}">
+							<span th:text="${member.userName}">홍길동</span>
+						</label>
+					</div>
+				</div>
+
+				<div class="filter-row">
+					<div class="filter-label label-progress">진척도</div>
+					<div class="filter-options">
+						<label><input type="checkbox" name="progress" value="0"
+							th:checked="${param.progress != null and #arrays.contains(param.progress, '0')}">
+							0%</label> <label><input type="checkbox" name="progress"
+							value="1-25"
+							th:checked="${param.progress != null and #arrays.contains(param.progress, '1-25')}">
+							1~25%</label> <label><input type="checkbox" name="progress"
+							value="26-50"
+							th:checked="${param.progress != null and #arrays.contains(param.progress, '26-50')}">
+							26~50%</label> <label><input type="checkbox" name="progress"
+							value="51-75"
+							th:checked="${param.progress != null and #arrays.contains(param.progress, '51-75')}">
+							51~75%</label> <label><input type="checkbox" name="progress"
+							value="76-100"
+							th:checked="${param.progress != null and #arrays.contains(param.progress, '76-100')}">
+							76~100%</label>
+					</div>
+				</div>
+
+				<div class="filter-row">
+					<div class="filter-label label-date">등록일자</div>
+					<div class="filter-options">
+						<label><input type="checkbox" name="regDate" value="today"
+							th:checked="${param.regDate != null and #arrays.contains(param.regDate, 'today')}">
+							오늘</label> <label><input type="checkbox" name="regDate"
+							value="thisWeek"
+							th:checked="${param.regDate != null and #arrays.contains(param.regDate, 'thisWeek')}">
+							이번주</label> <label><input type="checkbox" name="regDate"
+							value="thisMonth"
+							th:checked="${param.regDate != null and #arrays.contains(param.regDate, 'thisMonth')}">
+							이번달</label>
+					</div>
+				</div>
+
+				<div class="filter-row">
+					<div class="filter-label label-date">마감일자</div>
+					<div class="filter-options">
+						<label><input type="checkbox" name="dueDate" value="today"
+							th:checked="${param.dueDate != null and #arrays.contains(param.dueDate, 'today')}">
+							오늘</label> <label><input type="checkbox" name="dueDate"
+							value="thisWeek"
+							th:checked="${param.dueDate != null and #arrays.contains(param.dueDate, 'thisWeek')}">
+							이번주</label> <label><input type="checkbox" name="dueDate"
+							value="thisMonth"
+							th:checked="${param.dueDate != null and #arrays.contains(param.dueDate, 'thisMonth')}">
+							이번달</label>
 					</div>
 				</div>
 
 				<div
 					style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-					<div style="margin: 0 auto; margin-left: 47%;">
-						<button type="button" class="btn btn-sm text-secondary"
-							style="border: none; background: none; color: #3b82f6;">옵션
-							전체보기 ∨</button>
-					</div>
+					<div style="margin: 0 auto; margin-left: 47%;"></div>
 					<div style="display: flex; gap: 8px;">
-						<button type="reset" class="btn-pill-light">🔄 지우기</button>
+						<button type="button" class="btn-pill-light"
+							th:onclick="|location.href='@{/project/task(projectId=${param.projectId})}'|">🔄
+							지우기</button>
 						<button type="submit" class="btn-pill-primary">적용</button>
 					</div>
 				</div>
@@ -86,8 +150,6 @@
 				style="font-size: 14px; text-align: center;">
 				<thead>
 					<tr>
-						<th style="width: 40px; text-align: center;"><input
-							type="checkbox"></th>
 						<th style="width: 60px; text-align: center;">#</th>
 						<th style="text-align: center;">프로젝트</th>
 						<th style="text-align: center;">일감유형</th>
@@ -105,7 +167,6 @@
 					<tr th:each="task, status : ${taskListinfo}"
 						th:onclick="|location.href='@{/project/task/detail/{id}(id=${task.taskId}, projectId=${task.projectId})}'|"
 						style="cursor: pointer;">
-						<td><input type="checkbox"></td>
 						<td th:text="${status.count}">1</td>
 						<td><a href="#"
 							style="text-decoration: none; color: #3b82f6; font-weight: 500;"
@@ -137,19 +198,16 @@
 								<span class="more-options-btn" onclick="toggleDropdown(this)">•••</span>
 
 								<div class="dropdown-menu-box">
-    <button type="button" class="dropdown-item edit-btn"
-        th:onclick="|location.href='@{/project/task/update/{id}(id=${task.taskId}, projectId=${task.projectId})}'|">
-        ✏️ 편집
-    </button>
+									<button type="button" class="dropdown-item edit-btn"
+										th:onclick="|location.href='@{/project/task/update/{id}(id=${task.taskId}, projectId=${task.projectId})}'|">
+										✏️ 편집</button>
 
-    <button type="button"
-        class="dropdown-item delete-btn task-delete-trigger"
-        th:data-task-id="${task.taskId}" 
-        th:data-task-title="${task.taskTitle}"
-        th:data-project-id="${task.projectId}">
-        🗑️ 삭제
-    </button>
-</div>
+									<button type="button"
+										class="dropdown-item delete-btn task-delete-trigger"
+										th:data-task-id="${task.taskId}"
+										th:data-task-title="${task.taskTitle}"
+										th:data-project-id="${task.projectId}">🗑️ 삭제</button>
+								</div>
 							</div>
 						</td>
 					</tr>
@@ -160,27 +218,35 @@
 				</tbody>
 			</table>
 		</div>
-		    <dialog class="repository-delete-dialog" id="taskDeleteDialog" aria-labelledby="taskDeleteDialogTitle">
-    <div class="repository-delete-dialog-header">
-        <h2 id="taskDeleteDialogTitle">일감 삭제</h2>
-        <button class="repository-dialog-close" type="button" aria-label="닫기" data-task-delete-close>&times;</button>
-    </div>
-    <p><strong id="taskDeleteName" style="color: #ff4d4f;">일감명</strong>을(를) 삭제합니다. 하위 일감이나 관련 데이터가 함께 영향받을 수 있으며, 이 작업은 되돌릴 수 없습니다.</p>
-    
-    <form id="taskDeleteForm" method="post">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        
-        <label for="taskDeleteConfirmationName">
-            <span id="taskDeletePrompt">삭제하려면 일감명을 입력하세요.</span>
-            <input id="taskDeleteConfirmationName" name="confirmationName" type="text" required autocomplete="off">
-        </label>
-        
-        <div class="repository-dialog-actions">
-            <button class="repository-button repository-button-secondary" type="button" data-task-delete-close>취소</button>
-            <button class="repository-button repository-button-danger" type="submit" id="taskDeleteSubmitBtn" disabled>삭제 확인</button>
-        </div>
-    </form>
-</dialog>
+		<dialog class="repository-delete-dialog" id="taskDeleteDialog"
+			aria-labelledby="taskDeleteDialogTitle">
+		<div class="repository-delete-dialog-header">
+			<h2 id="taskDeleteDialogTitle">일감 삭제</h2>
+			<button class="repository-dialog-close" type="button" aria-label="닫기"
+				data-task-delete-close>&times;</button>
+		</div>
+		<p>
+			<strong id="taskDeleteName" style="color: #ff4d4f;">일감명</strong>을(를)
+			삭제합니다. 하위 일감이나 관련 데이터가 함께 영향받을 수 있으며, 이 작업은 되돌릴 수 없습니다.
+		</p>
+
+		<form id="taskDeleteForm" method="post">
+			<input type="hidden" th:name="${_csrf.parameterName}"
+				th:value="${_csrf.token}"> <label
+				for="taskDeleteConfirmationName"> <span
+				id="taskDeletePrompt">삭제하려면 일감명을 입력하세요.</span> <input
+				id="taskDeleteConfirmationName" name="confirmationName" type="text"
+				required autocomplete="off">
+			</label>
+
+			<div class="repository-dialog-actions">
+				<button class="repository-button repository-button-secondary"
+					type="button" data-task-delete-close>취소</button>
+				<button class="repository-button repository-button-danger"
+					type="submit" id="taskDeleteSubmitBtn" disabled>삭제 확인</button>
+			</div>
+		</form>
+		</dialog>
 		<script th:inline="javascript">
 			window.insertTaskBaseUrl = /*[[@{/project/task/insert}]]*/'/project/task/insert';
 		</script>

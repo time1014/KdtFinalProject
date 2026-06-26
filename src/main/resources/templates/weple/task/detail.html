@@ -160,7 +160,7 @@
 									<div>
 										<strong th:text="${history.userName}"></strong>님이 <span
 											th:text="${#temporals.format(history.actionAt, 'yyyy-MM-dd HH:mm')}">에
-											</span>변경함
+										</span>변경함
 									</div>
 									<span class="history-index" th:text="'#' + ${stat.count}">#1</span>
 								</div>
@@ -201,7 +201,8 @@
 					<div id="tab-comments" class="tab-content" style="display: none;">
 						<div class="comment-header-title"
 							style="margin-bottom: 15px; font-size: 15px;">
-							<strong> 댓글 <span id="commentCount" style="color: #3b82f6;" 
+							<strong> 댓글 <span id="commentCount"
+								style="color: #3b82f6;"
 								th:text="${taskComment != null ? taskComment.size() : 0}"></span>
 							</strong>
 						</div>
@@ -371,11 +372,12 @@
 								</tr>
 							</thead>
 							<tbody>
-								<tr>
-									<td>2026-06-11</td>
-									<td class="user-name">Redmine Admin</td>
-									<td>개발 및 설계</td>
-									<td class="time-value">2.00 시간</td>
+								<tr th:each="spentTime : ${spentTimeList}">
+									<td
+										th:text="${#temporals.format(spentTime.createdAt, 'yyyy.MM.dd')}"></td>
+									<td class="user-name" th:text="${spentTime.userName}"></td>
+									<td th:text="${spentTime.spentContent}"></td>
+									<td class="time-value" th:text="${spentTime.spentHour + ' 시간'}"></td>
 								</tr>
 							</tbody>
 						</table>

@@ -14,6 +14,7 @@
 	    <result property="spentHour" column="spent_hour" />
 	    <result property="countSpentHour" column="countSpentHour"/>
 		<result property="totalSpentHour" column="totalSpentHour"/>
+		<result property="estimatedTime" column="estimated_time"/>
 	</resultMap>
 	
 	<select id="projectTimeAll" resultMap="TotalTimeResultMap">
@@ -32,6 +33,8 @@
        		   , p.project_title
                , u.user_name
                , t.task_title
+               , t.task_describe
+               , t.estimated_time
 		FROM work_time w_tme
 		LEFT JOIN project P ON w_tme.project_id = p.project_id
 		LEFT JOIN users u ON u.user_code = w_tme.user_code

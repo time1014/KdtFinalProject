@@ -1,10 +1,10 @@
 package com.weple.cloud.task.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
-import com.weple.cloud.history.task.service.TaskHistoryVO;
 import com.weple.cloud.task.service.TaskCommentVO;
 import com.weple.cloud.task.service.TaskMemberVO;
 import com.weple.cloud.task.service.TaskMilestoneVO;
@@ -59,5 +59,12 @@ public interface TaskMapper {
     public List<TaskSpentTimeVO> taskSpentTime(@Param("tId") String tId);
 
     public Long getMilestoneIdByTaskId(@Param("tId") String tId);
+    
+    public List<TaskVO> findAllWithFilters(Map<String, Object> filterParams);
+    
+    public List<TaskVO> findAllMyTasksWithFilters(Map<String,Object>allParams);
+  
+  // 소요시간의 진척도 자동계산 프로시저 - 민지
+    public void updateHierarchicalProgress(@Param("taskId") String taskId);
 
 }

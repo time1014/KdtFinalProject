@@ -1,5 +1,6 @@
 package com.weple.cloud.task.web;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,6 @@ import com.weple.cloud.task.service.TaskHistoryDTO;
 import com.weple.cloud.task.service.TaskProjectSelectVO;
 import com.weple.cloud.task.service.TaskService;
 import com.weple.cloud.task.service.TaskSpentTimeVO;
-import com.weple.cloud.task.service.TaskUpdateHistoryVO;
 import com.weple.cloud.task.service.TaskVO;
 
 import lombok.RequiredArgsConstructor;
@@ -42,17 +42,51 @@ public class TaskController {
 	
 	//프로젝트 내부 일감 목록 페이지 로드
 	@GetMapping("/project/task")
-    public String projectTaskList(@RequestParam("projectId") Long pId,Model model) {
-		
+	public String projectTaskList(
+	        @RequestParam("projectId") Long pId,
+	        @RequestParam(value = "searchKeyword", required = false) String searchKeyword,
+	        @RequestParam(value = "typeIds", required = false) List<Integer> typeIds,
+	        @RequestParam(value = "statusIds", required = false) List<String> statusIds, // commonId가 String이므로 수정
+	        @RequestParam(value = "priorityNames", required = false) List<String> priorityNames,
+	        @RequestParam(value = "memberIds", required = false) List<String> memberIds,
+	        @RequestParam(value = "progress", required = false) List<String> progress,
+	        @RequestParam(value = "regDate", required = false) List<String> regDate,
+	        @RequestParam(value = "dueDate", required = false) List<String> dueDate,
+	        Model model, 
+	        @AuthenticationPrincipal LoginUserDetails loginUser) {
+	    
+	    Long companyId = loginUser.getLoginUser().getCompanyId();
+	    
 
-		List<TaskVO> list = taskService.findAll(pId);
-		model.addAttribute("projectId", pId);
-		model.addAttribute("project", projectService.findById(String.valueOf(pId)));
-		model.addAttribute("sidebarMenu", "project");
-		model.addAttribute("currentMenu", "task");
-		model.addAttribute("taskListinfo",list);
-        return "weple/task/list";
-    }
+	    Map<String, Object> filterParams = new HashMap<>();
+	    filterParams.put("tManager", loginUser.getLoginUser().getUserCode());
+	    filterParams.put("projectId", pId);
+	    filterParams.put("searchKeyword", searchKeyword);
+	    filterParams.put("typeIds", typeIds);
+	    filterParams.put("statusIds", statusIds);
+	    filterParams.put("priorityNames", priorityNames);
+	    filterParams.put("memberIds", memberIds);
+	    filterParams.put("progress", progress);
+	    filterParams.put("regDate", regDate);
+	    filterParams.put("dueDate", dueDate);
+
+	    List<TaskVO> list = taskService.findAllWithFilters(filterParams);
+	    model.addAttribute("projectId", pId);
+	    model.addAttribute("project", projectService.findById(String.valueOf(pId)));
+	    model.addAttribute("sidebarMenu", "project");
+	    model.addAttribute("currentMenu", "task");
+	    
+	    // 필터 목록 VO
+	    model.addAttribute("typeList", taskService.findType(companyId));
+	    model.addAttribute("statusList", taskService.findStatus());
+	    model.addAttribute("memberList", taskService.findMember(pId)); 
+	    model.addAttribute("priorityList", taskService.findPriority(companyId));
+	    model.addAttribute("parentTaskList", taskService.findParent(pId));
+	    
+	    model.addAttribute("taskListinfo", list);
+	    
+	    return "weple/task/list";
+	}
 	
 	//일감 등록 페이지 로드 + 선택 목록 값 로드
 	@GetMapping("/project/task/insert")
@@ -65,7 +99,7 @@ public class TaskController {
 	    //내게 할당에서 현재 로그인 정보 확인
 	    model.addAttribute("loginUserCode",userCode);
 		
-		//프로젝트 내부 일감 조회(본인 일감 조건 아직 X)
+		
 		model.addAttribute("currentMenu", "task");
 		// 일감유형
 		model.addAttribute("typeList", taskService.findType(companyId));
@@ -196,14 +230,42 @@ public class TaskController {
 	
 	// 전체 일감 조회 페이지 로드
 	@GetMapping("/task/all-list")
-	public String allTaskList(@AuthenticationPrincipal LoginUserDetails loginUser , Model model) {
-		String userCode = loginUser.getLoginUser().getUserCode();
-		List<TaskVO> list = taskService.findAllList(userCode);
-		List<TaskProjectSelectVO> projectList = taskService.findMyProject(userCode);
-		model.addAttribute("allList",list);
-		model.addAttribute("projectList",projectList);
-		return "weple/task/all-list";
-		
+	public String allTaskList(
+	        @AuthenticationPrincipal LoginUserDetails loginUser,
+	        @RequestParam(required = false) String searchKeyword,
+	        @RequestParam(required = false) List<String> projectIds,
+	        @RequestParam(required = false) List<String> typeIds,
+	        @RequestParam(required = false) List<String> statusIds,
+	        @RequestParam(required = false) List<String> priorityNames,
+	        @RequestParam(required = false) List<String> progress,
+	        @RequestParam(required = false) List<String> regDate,
+	        @RequestParam(required = false) List<String> dueDate,
+	        Model model) {
+
+	    String userCode = loginUser.getLoginUser().getUserCode();
+	    Long companyId = loginUser.getLoginUser().getCompanyId();
+
+	    Map<String, Object> allParams = new HashMap<>();
+	    allParams.put("tManager", userCode);
+	    allParams.put("searchKeyword", searchKeyword);
+	    allParams.put("projectIds", projectIds);
+	    allParams.put("typeIds", typeIds);
+	    allParams.put("statusIds", statusIds);
+	    allParams.put("priorityNames", priorityNames);
+	    allParams.put("progress", progress);
+	    allParams.put("regDate", regDate);
+	    allParams.put("dueDate", dueDate);
+
+	    List<TaskProjectSelectVO> projectList = taskService.findMyProject(userCode);
+
+	    model.addAttribute("sidebarMenu", "task");
+	    model.addAttribute("allList", taskService.findAllMyTasksWithFilters(allParams));
+	    model.addAttribute("projectList", projectList);
+	    model.addAttribute("typeList", taskService.findType(companyId));
+	    model.addAttribute("statusList", taskService.findStatus());
+	    model.addAttribute("priorityList", taskService.findPriority(companyId));
+
+	    return "weple/task/all-list";
 	}
 	
 	// 프로젝트 내부 수정 페이지 로드 + 선택 값 목록 로드 + 기존값 로드
@@ -320,6 +382,7 @@ public class TaskController {
 	    // commentArea 부분만 로드
 	    return "weple/task/detail :: #commentArea";
 	}
+	
 
 
 

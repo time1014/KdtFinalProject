@@ -338,6 +338,15 @@ public class TaskServiceImpl implements TaskService {
 	    }
 	
 }
+	@Override
+	public List<TaskVO> findAllWithFilters(Map<String, Object> filterParams) {
+		return taskMapper.findAllWithFilters(filterParams);
+	}
+	@Override
+	public List<TaskVO> findAllMyTasksWithFilters(Map<String, Object> allParams) {
+
+		return taskMapper.findAllMyTasksWithFilters(allParams);
+	}
 	}
 
 

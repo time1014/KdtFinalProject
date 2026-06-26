@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.weple.cloud.task.mapper.TaskMapper;
 import com.weple.cloud.time.mapper.TimeMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class TimeServiceImpl implements TimeService {
 
 	private final TimeMapper timeMapper;
+	private final TaskMapper taskMapper;
 
 	// -------------------------------프로젝트 내 소요시간------------------------------
 	// 전체조회
@@ -23,13 +26,14 @@ public class TimeServiceImpl implements TimeService {
 	}
 
 	// 등록
+	@Transactional
 	@Override
 	public long addProjectTime(WorkTimeVO workTimeVO) {
 		long result = timeMapper.insertProjectTime(workTimeVO);
 		// 프로시저 실행
-		if (result == 1) {
-			timeMapper.updateTaskSpentHours();
-		}
+		if (result > 0) {
+			taskMapper.updateHierarchicalProgress(workTimeVO.getTaskId());
+	    }
 		return result == 1 ? workTimeVO.getWorkId() : -1;
 	}
 

@@ -37,4 +37,6 @@ public class WorkTimeVO {
 	private String taskDescribe;
 	private Long countSpentHour;
 	private Long totalSpentHour;
+	private long taskClassificationId;
+	private long estimatedTime;
 }
