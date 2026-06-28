@@ -32,9 +32,9 @@ public interface WorkLogService {
 			 String userCode,
 			 List<String> typeNames);
 
-			public List<WorkLogVO> findByDate(
-					String targetDate,
-					String projectId,
-					String userCode,
-					List<String> typeNames);
+	  public List<WorkLogVO> findByDate(
+			  String targetDate,
+			  String projectId,
+			  String userCode,
+			  List<String> typeNames);
 }

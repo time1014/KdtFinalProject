@@ -11,6 +11,8 @@
             FROM (
                 SELECT
                     th.history_id,
+                    th.task_id,
+                    t.project_id AS projectId,
                     p.project_title AS projectTitle,
                     u.user_name AS userName,
                     NVL(d_title.new_value, t.task_title) AS taskTitle,
@@ -104,7 +106,7 @@
     <select id="sumSpentHour" resultType="java.lang.Double">
         SELECT NVL(SUM(w.spent_hour), 0)
         FROM work_time w
-        INNER JOIN task t ON w.task_id = t.task_id
+        LEFT JOIN task t ON w.task_id = t.task_id
         LEFT JOIN task_types tt ON t.type_id = tt.type_id
         <where>
             <if test="projectId != null and projectId != ''">
@@ -168,6 +170,8 @@
 	<select id="selectByDate" resultType="com.weple.cloud.history.worklog.service.WorkLogVO">
 	    SELECT
 	        th.history_id,
+	        th.task_id,
+            t.project_id AS projectId,
 	        p.project_title AS projectTitle,
 	        u.user_name AS userName,
 	        NVL(d_title.new_value, t.task_title) AS taskTitle,

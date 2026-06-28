@@ -29,7 +29,6 @@
 
     <div class="project-card">
         <form id="searchForm" method="get" th:action="@{/worklog}">
-            <!-- ★ 검색 버튼 클릭 시 search=true 전송 -->
             <input type="hidden" id="searchFlag" name="search" value="true">
 
             <div class="filter-toolbar">
@@ -124,74 +123,78 @@
 
         <h4 class="sub-list-title">전체 작업 내역 목록</h4>
 
-        <!-- ★ 검색 전 안내 메시지 -->
+        <!-- 검색 전 안내 -->
         <div th:if="${!searched}" class="empty-message">
             필터를 설정하고 검색 버튼을 눌러주세요.
         </div>
 
-        <!-- ★ 검색 후 결과 표시 -->
+        <!-- 검색 후 결과 -->
         <th:block th:if="${searched}">
-            <th:block th:with="validLogs=${workLogList != null ? workLogList.?[#this != null] : {}}">
 
-                <div th:if="${#lists.isEmpty(validLogs)}" class="empty-message">
-                    조회된 작업 내역이 없습니다.
+            <div th:if="${workLogList == null or workLogList.isEmpty()}" class="empty-message">
+                조회된 작업 내역이 없습니다.
+            </div>
+
+            <th:block th:if="${workLogList != null and !workLogList.isEmpty()}">
+                <!-- 날짜 헤더 -->
+                <div class="date-section-title" th:text="${targetDate}"></div>
+
+                <div class="project-table-wrap">
+                    <table class="project-table">
+                        <thead>
+                            <tr>
+                                <th>등록일시</th>
+                                <th>프로젝트</th>
+                                <th>사용자</th>
+                                <th>일감</th>
+                                <th>일감유형</th>
+                                <th>작업유형</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="log : ${workLogList}">
+                                <td th:text="${log.actionAt != null ? #temporals.format(log.actionAt,'HH:mm') : '00:00'}"></td>
+                                <!-- ★ 프로젝트명 링크 → 프로젝트 개요 -->
+                                <td>
+                                    <a th:if="${log.projectId != null}"
+                                       th:href="@{/project/overview(projectId=${log.projectId})}"
+                                       class="table-link"
+                                       th:text="${log.projectTitle}">
+                                    </a>
+                                    <span th:if="${log.projectId == null}" th:text="${log.projectTitle}"></span>
+                                </td>
+                                <td th:text="${log.userName}"></td>
+                                <!-- ★ 일감명 링크 → 일감 상세 -->
+                                <td class="text-left">
+                                    <a th:if="${log.taskId != null and log.projectId != null}"
+                                       th:href="@{/project/task/detail/{tId}(tId=${log.taskId}, projectId=${log.projectId})}"
+                                       class="table-link"
+                                       th:text="${log.taskTitle}">
+                                    </a>
+                                    <span th:if="${log.taskId == null or log.projectId == null}" th:text="${log.taskTitle}"></span>
+                                </td>
+                                <td>
+                                    <span th:if="${log.typeName == '기획'}" class="status-badge type-dev" th:text="${log.typeName}"></span>
+                                    <span th:if="${log.typeName == '새 기능'}" class="status-badge type-bug" th:text="${log.typeName}"></span>
+                                    <span th:if="${log.typeName == '개선'}" class="status-badge type-support" th:text="${log.typeName}"></span>
+                                    <span th:if="${log.typeName == '피드백'}" class="status-badge type-improve" th:text="${log.typeName}"></span>
+                                    <span th:if="${log.typeName != '기획' and log.typeName != '새 기능' and log.typeName != '개선' and log.typeName != '피드백'}"
+                                          class="status-badge type-default" th:text="${log.typeName}"></span>
+                                </td>
+                                <td>
+                                    <span th:if="${log.actionType == 'CREATE'}" class="action-badge action-create">CREATE</span>
+                                    <span th:if="${log.actionType == 'UPDATE'}" class="action-badge action-update">UPDATE</span>
+                                    <span th:if="${log.actionType == 'DELETE'}" class="action-badge action-delete">DELETE</span>
+                                    <span th:if="${log.actionType != 'CREATE' and log.actionType != 'UPDATE' and log.actionType != 'DELETE'}"
+                                          class="action-badge action-default" th:text="${log.actionType}"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-
-                <th:block th:unless="${#lists.isEmpty(validLogs)}"
-                          th:each="log, stat : ${validLogs}"
-                          th:with="
-                            prevLog=${stat.first ? null : validLogs[stat.index - 1]},
-                            prevKey=${(prevLog == null or prevLog.actionAt == null) ? null : #temporals.format(prevLog.actionAt, 'yyyy-MM-dd')},
-                            curKey=${log.actionAt != null ? #temporals.format(log.actionAt, 'yyyy-MM-dd') : '미정'}">
-
-                    <th:block th:if="${stat.first or prevKey != curKey}">
-                        <div class="date-section-title" th:text="${curKey}">2026-06-19</div>
-                        <div class="project-table-wrap">
-                            <table class="project-table">
-                                <thead>
-                                    <tr>
-                                        <th>등록일시</th>
-                                        <th>프로젝트</th>
-                                        <th>사용자</th>
-                                        <th>일감</th>
-                                        <th>일감유형</th>
-                                        <th>작업유형</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="worklog-item-row"
-                                        th:each="innerLog : ${validLogs}"
-                                        th:if="${innerLog.actionAt != null ? #temporals.format(innerLog.actionAt,'yyyy-MM-dd') : '미정'} == ${curKey}">
-                                        <td th:text="${innerLog.actionAt != null ? #temporals.format(innerLog.actionAt,'HH:mm') : '00:00'}">14:20</td>
-                                        <td class="text-left" th:text="${innerLog.projectTitle}">WEPLE</td>
-                                        <td th:text="${innerLog.userName}">신짱구</td>
-                                        <td class="text-left" th:text="${innerLog.taskTitle}">로그인 기능 구현</td>
-                                        <td>
-                                            <span th:if="${innerLog.typeName == '기획'}" class="status-badge type-dev" th:text="${innerLog.typeName}"></span>
-                                            <span th:if="${innerLog.typeName == '새 기능'}" class="status-badge type-bug" th:text="${innerLog.typeName}"></span>
-                                            <span th:if="${innerLog.typeName == '개선'}" class="status-badge type-support" th:text="${innerLog.typeName}"></span>
-                                            <span th:if="${innerLog.typeName == '피드백'}" class="status-badge type-improve" th:text="${innerLog.typeName}"></span>
-                                            <span th:if="${innerLog.typeName != '기획' and innerLog.typeName != '새 기능' and innerLog.typeName != '개선' and innerLog.typeName != '피드백'}"
-                                                  class="status-badge type-default" th:text="${innerLog.typeName}"></span>
-                                        </td>
-                                        <td>
-                                            <span th:if="${innerLog.actionType == 'CREATE'}" class="action-badge action-create">CREATE</span>
-                                            <span th:if="${innerLog.actionType == 'UPDATE'}" class="action-badge action-update">UPDATE</span>
-                                            <span th:if="${innerLog.actionType == 'DELETE'}" class="action-badge action-delete">DELETE</span>
-                                            <span th:if="${innerLog.actionType != 'CREATE' and innerLog.actionType != 'UPDATE' and innerLog.actionType != 'DELETE'}"
-                                                  class="action-badge action-default" th:text="${innerLog.actionType}"></span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </th:block>
-
-                </th:block>
-
             </th:block>
 
-            <!-- 페이징 -->
+            <!-- 페이징 (날짜 단위) -->
             <div class="pagination-wrap">
                 <a th:href="${currentPage > 1}
                         ? @{/worklog(page=${currentPage - 1}, projectId=${projectId}, startDate=${startDate}, endDate=${endDate}, userCode=${userCode}, typeNames=${typeNames}, search='true')}
@@ -208,6 +211,7 @@
                    th:classappend="${currentPage >= totalPages} ? 'disabled'"
                    class="page-btn">다음 &gt;</a>
             </div>
+
         </th:block>
 
     </div>
@@ -281,18 +285,15 @@
             }
             syncTimePeriod();
 
-            // 최근 5일 버튼 - search=true 로 바로 submit
             document.getElementById('recentPeriodBtn').addEventListener('click', function () {
                 applyRecentDays(5);
                 searchFlag.value = 'true';
                 setTimeout(function () { syncTimePeriod(); searchForm.submit(); }, 0);
             });
 
-            // 이전 5일 버튼 - search=true 로 바로 submit
             document.getElementById('dateBackBtn').addEventListener('click', function () {
                 var curStart = parseFormatted(startInput.value);
                 var curEnd   = parseFormatted(endInput.value);
-
                 if (!curStart || !curEnd) {
                     applyRecentDays(5);
                 } else {
@@ -305,21 +306,15 @@
                 setTimeout(function () { syncTimePeriod(); searchForm.submit(); }, 0);
             });
 
-            // ★ 초기화 버튼 - 모든 필터 초기화 후 빈 화면으로
             document.getElementById('resetBtn').addEventListener('click', function () {
                 var projectSelect = searchForm.querySelector('select[name="projectId"]');
                 if (projectSelect) projectSelect.value = '';
-
                 var userSelect = searchForm.querySelector('select[name="userCode"]');
                 if (userSelect) userSelect.value = '';
-
                 searchForm.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
                     cb.checked = false;
                 });
-
                 applyRecentDays(5);
-
-                // ★ search=false → 빈 화면으로
                 searchFlag.value = 'false';
                 setTimeout(function () { syncTimePeriod(); searchForm.submit(); }, 0);
             });

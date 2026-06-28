@@ -220,13 +220,16 @@
 .project-table-wrap {
     border: 1px solid #e6ecf5;
     border-radius: 10px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     background: #fff;
     margin-bottom: 18px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .project-table {
     width: 100%;
+    min-width: 760px;
     border-collapse: collapse;
     table-layout: fixed;
 }

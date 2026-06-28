@@ -27,4 +27,17 @@ public interface ProjectWorkLogService {
 				  String endDate,
 				  String userCode,
 				  List<String> typeNames);
+	
+	public List<String> findDistinctDates(
+            String projectId,
+            String startDate,
+            String endDate,
+            String userCode,
+            List<String> typeNames);
+	
+	public List<WorkLogVO> findByDate(
+            String targetDate,
+            String projectId,
+            String userCode,
+            List<String> typeNames);
 }
