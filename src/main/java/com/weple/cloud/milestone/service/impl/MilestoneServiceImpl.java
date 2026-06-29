@@ -10,6 +10,7 @@ import com.weple.cloud.milestone.service.MilestoneInfoVO;
 import com.weple.cloud.milestone.service.MilestoneService;
 import com.weple.cloud.milestone.service.MilestoneVO;
 import com.weple.cloud.milestone.service.TaskGroupStatVO;
+import com.weple.cloud.project.service.ProjectVO;
 import com.weple.cloud.system.service.TaskTypeVO;
 import com.weple.cloud.task.service.TaskVO;
 
@@ -68,6 +69,20 @@ public class MilestoneServiceImpl implements MilestoneService {
         return stats;
     }
 	
+    
+    // 단건 조회
+ 	@Override
+ 	public ProjectVO findById(Long projectId) {
+ 		return milestoneMapper.selectById(projectId);
+ 	}
+    
+    
+ 	// 버전 등록
+    @Override
+    public void addVersion(MilestoneVO milestoneVO) {
+
+    	milestoneMapper.insertVersion(milestoneVO);
+    }
 
     // 마일스톤 등록
     @Transactional // [핵심] 두 작업을 하나의 단위로 묶어 무결성 보장
@@ -101,19 +116,51 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
-    public List<TaskVO> getUnassignedTaskList(Long projectId, int startRow, int endRow, String taskStatus, String priority, String taskManager, Long typeId) {
-        return milestoneMapper.selectUnassignedTasks(projectId, startRow, endRow, taskStatus, priority, taskManager, typeId);
+    public List<TaskVO> getUnassignedTaskList(Long projectId, Long milestoneId, int startRow, int endRow, String taskStatus, String priority, String taskManager, Long typeId) {
+        return milestoneMapper.selectUnassignedTasks(projectId, milestoneId, startRow, endRow, taskStatus, priority, taskManager, typeId);
     }
 
     @Override
-    public int getUnassignedTaskCount(Long projectId, String taskStatus, String priority, String taskManager, Long typeId) {
-        return milestoneMapper.selectUnassignedTasksCount(projectId, taskStatus, priority, taskManager, typeId);
+    public int getUnassignedTaskCount(Long projectId, Long milestoneId, String taskStatus, String priority, String taskManager, Long typeId) {
+        return milestoneMapper.selectUnassignedTasksCount(projectId, milestoneId, taskStatus, priority, taskManager, typeId);
     }
 
+    @Override
+    public MilestoneVO getMilestoneInfoById(Long milestoneId) {
+        return milestoneMapper.selectMilestoneInfoById(milestoneId);
+    }
+    
+    
+    @Override
+    public List<TaskVO> getConnectedTaskList(Long milestoneId) {
+        return milestoneMapper.selectConnectedTaskList(milestoneId);
+    }
+    
+    @Override
+    public List<MilestoneVO> getMilestoneListForUpdate(Long projectId, Long milestoneId) {
+        return milestoneMapper.selectMilestoneListForUpdate(projectId, milestoneId);
+    }
+    
+    @Override
+    @Transactional // 마일스톤 수정, 일감 해제, 일감 등록이 동시에 일어나므로 트랜잭션 필수
+    public void modifyMilestone(MilestoneVO milestoneVO, List<String> taskIds) {
+        // 1. 마일스톤 기본 정보 수정 (이름, 설명, 완료일, 상위 마일스톤)
+        milestoneMapper.updateMilestone(milestoneVO);
+        
+        // 2. [A안] 기존에 이 마일스톤에 연결되어 있던 일감들을 전부 해제(NULL)
+        milestoneMapper.clearTasksMilestoneId(milestoneVO.getMilestoneId());
+        
+        // 3. [A안] 새로 최신화된 일감 리스트가 있다면 일괄 연결 (기존 updateTasksMilestoneId 재사용)
+        if (taskIds != null && !taskIds.isEmpty()) {
+            milestoneMapper.updateTasksMilestoneId(milestoneVO.getProjectId(), milestoneVO.getMilestoneId(), taskIds);
+        }
+    }
+    
+    
 	// 마일스톤 편집
 	@Override
-	public void updateMilestone(MilestoneVO milestoneVO) {
-		milestoneMapper.updateMilestone(milestoneVO);
+	public void updateParentMilestone(MilestoneVO milestoneVO) {
+		milestoneMapper.updateParentMilestone(milestoneVO);
 	}
 
 	// 마일스톤 삭제

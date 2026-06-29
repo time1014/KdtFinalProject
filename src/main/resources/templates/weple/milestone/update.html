@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
+<head>
+<meta charset="UTF-8">
+<title>마일스톤 수정</title>
+<link rel="stylesheet" th:href="@{/css/milestone/milestone-insert.css}">
+</head>
+<body>
+
+<section class="container-fluid my-4" style="padding: 20px;">
+	<div class="mb-4" style="margin-bottom: 25px;">
+		<h3 class="fw-bold" style="color: #1e293b; font-weight: 700;">마일스톤 수정</h3>
+	</div>
+	
+	<div class="form-container">
+		<form id="milestoneUpdateForm" method="post" enctype="multipart/form-data"
+			th:action="@{/project/milestone/update(projectId=${projectId})}">
+			
+			<input type="hidden" name="milestoneId" th:value="${milestone.milestoneId}">
+			
+			<div id="hiddenTasksContainer">
+				<input type="hidden" name="taskIds" th:each="task : ${connectedTaskList}" th:value="${task.taskId}">
+			</div>
+
+			<div class="row" style="margin-bottom: 20px;">
+				<div class="col-md-12">
+					<label class="form-label">마일스톤 이름 <span class="text-danger">*</span></label>
+					<input type="text" class="form-control" name="milestoneTitle" th:value="${milestone.milestoneTitle}" required>
+				</div>
+			</div>
+
+			<div class="row" style="margin-bottom: 20px;">
+				<div class="col-md-12">
+					<label class="form-label">설명</label>
+					<textarea class="form-control" name="milestoneDescribe" rows="5" th:text="${milestone.milestoneDescribe}"></textarea>
+				</div>
+			</div>
+
+			<div class="row" style="margin-bottom: 20px;">
+				<div class="col-md-6">
+					<label class="form-label">목표 완료일</label> 
+					<input type="date" class="form-control" name="finishDate" 
+						   th:value="${milestone.finishDate != null ? #strings.substring(milestone.finishDate, 0, 10) : ''}">
+				</div>
+			</div>
+			
+			<div class="row" style="margin-bottom: 20px;">
+			    <div class="col-md-6">
+			        <label class="form-label">상위 마일스톤</label>
+			        <select class="form-select" name="parentMilestoneId">
+			            <option value="">-- 없음 (최상위 마일스톤) --</option>
+			            <option th:each="parent : ${parentMilestoneList}" 
+			                    th:value="${parent.milestoneId}" 
+			                    th:text="${parent.milestoneTitle}"
+			                    th:selected="${parent.milestoneId == milestone.parentMilestoneId}">
+			            </option>
+			        </select>
+			    </div>
+			</div>
+
+			<div class="row" style="margin-bottom: 30px;">
+				<div class="col-md-12">
+					<label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+						<span>연결된 일감 <span id="selectedCount" class="badge bg-secondary" th:text="${#lists.size(connectedTaskList)} + '개'">0개</span></span>
+						<button type="button" class="btn-task-select" id="btnOpenModal">일감 등록하기</button>
+					</label>
+					
+					<div id="selectedTasksPreview" class="selected-tasks-preview-box">
+						<th:block th:if="${#lists.isEmpty(connectedTaskList)}">
+							선택된 일감이 없습니다. '일감 등록하기' 버튼을 눌러 일감을 선택해주세요.
+						</th:block>
+						<th:block th:unless="${#lists.isEmpty(connectedTaskList)}">
+							<span class="selected-task-badge" th:each="task : ${connectedTaskList}" th:text="${task.taskTitle}">일감명</span>
+						</th:block>
+					</div>
+				</div>
+			</div>
+			
+			<div class="row" style="margin-bottom: 20px;">
+			    <div class="col-md-6">
+			        <label class="form-label">마일스톤 상태</label>
+			        
+			        <div class="edit-mode-container" style="display: flex; align-items: center; gap: 12px;"
+			             th:with="currentProgress=${milestone.progressPercentage}">
+			            
+			            <input type="hidden" id="milestoneStatusHidden" name="milestoneStatus" th:value="${milestone.milestoneStatus}">
+			
+			            <label class="switch-control">
+			                <input type="checkbox" id="statusSwitch"
+			                       th:checked="${milestone.milestoneStatus == 'g2'}"
+			                       th:disabled="${currentProgress &lt; 100}"
+			                       onchange="toggleStatusText(this)">
+			                <span class="slider"></span>
+			            </label>
+			            
+			            <span class="switch-text" 
+			                  th:data-progress="${currentProgress}"
+			                  th:text="${currentProgress &lt; 100 ? '진척도 100% 필수' : (milestone.milestoneStatus == 'g2' ? '완료 처리' : '진행 중')}"
+			                  style="font-size: 13px; color: #64748b; user-select: none; font-weight: 500;">
+			                  진척도 100% 필수
+			            </span>
+			        </div>
+			    </div>
+			</div>
+			
+			<div style="display: flex; justify-content: flex-end; gap: 10px;">
+				<button type="button" th:onclick="|location.href='@{/project/milestone(projectId=${projectId})}'|" class="btn-insert-cancel">취소</button>
+				<button type="submit" class="btn-insert-submit">수정 완료</button>
+			</div>
+		</form>
+	</div>
+
+	<div id="taskModal" class="custom-modal">
+		<div class="custom-modal-content">
+			<div class="custom-modal-header">
+				<h5 class="fw-bold m-0">미지정 일감 불러오기</h5>
+				<span class="close-modal" id="btnCloseModal">&times;</span>
+			</div>
+			
+			<div class="custom-modal-body">
+				<div class="modal-filter-box row g-2 mb-3">
+					<div class="col-md-3">
+						<select id="filterStatus" class="form-select">
+							<option value="">-- 일감 상태 --</option>
+							<option value="e1">신규</option>
+							<option value="e2">진행 중</option>
+							<option value="e3">완료</option>
+							<option value="e4">결함</option>
+						</select>
+					</div>
+					<div class="col-md-2">
+						<select id="filterPriority" class="form-select">
+							<option value="">-- 우선순위 --</option>
+							<option value="긴급">긴급</option>
+							<option value="높음">높음</option>
+							<option value="낮음">낮음</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+				        <input type="text" id="filterManager" class="form-control" placeholder="담당자명 입력">
+				    </div>
+				    <div class="col-md-3">
+				        <select id="filterTypeId" class="form-select">
+				            <option value="">-- 일감 유형 전체 --</option>
+				            <option th:each="type : ${taskTypeList}" 
+				                    th:value="${type.typeId}" 
+				                    th:text="${type.typeName}">
+				            </option>
+				        </select>
+				    </div>
+					<div class="col-md-1">
+						<button type="button" id="btnSearchTasks" class="btn btn-dark w-100 h-100">검색</button>
+					</div>
+				</div>
+
+				<div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
+					<table class="table table-hover align-middle" style="font-size: 13px;">
+						<thead class="table-light sticky-top">
+							<tr>
+								<th style="width: 40px;"><input type="checkbox" id="thCheckAll"></th>
+								<th>일감명</th>
+								<th>상태</th>
+								<th>우선순위</th>
+								<th>담당자</th>
+								<th>유형</th>
+							</tr>
+						</thead>
+						<tbody id="unassignedTaskListBody">
+							<tr><td colspan="6" class="text-center text-muted py-4">조회된 일감이 없습니다.</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="d-flex justify-content-center mt-3">
+					<nav>
+						<ul class="pagination pagination-sm m-0" id="taskPaginationNav"></ul>
+					</nav>
+				</div>
+			</div>
+			
+			<div class="custom-modal-footer">
+				<button type="button" class="btn-insert-cancel py-2" id="btnCancelModal">취소</button>
+				<button type="button" class="btn-insert-submit py-2" id="btnConfirmTasks">선택 완료</button>
+			</div>
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+	    const projectId = /*[[${projectId}]]*/ null;
+	    const milestoneId = /*[[${milestone.milestoneId}]]*/ null; // milestoneId가 모델에 없다면 milestone.milestoneId로 안전하게 변경
+	    
+	    // 하나의 스크립트 안에서 안전하게 객체 초기화
+	    const initialTasks = {};
+	    
+	    /*[# th:each="task : ${connectedTaskList}"]*/
+	        var taskId = /*[[${task.taskId}]]*/ null;
+	        var taskTitle = /*[[${task.taskTitle}]]*/ '';
+	        if(taskId !== null) {
+	            initialTasks[taskId] = taskTitle;
+	        }
+	    /*[/]*/
+	    
+	    function toggleStatusText(checkbox) {
+		    const container = checkbox.closest('.edit-mode-container');
+		    const textSpan = container.querySelector('.switch-text');
+		    const hiddenInput = container.querySelector('#milestoneStatusHidden');
+		    
+		    // data-progress 속성에서 진척도 파싱
+		    const progress = parseInt(textSpan.getAttribute('data-progress') || '0', 10);
+		    
+		    // 1. 진척도가 100% 미만이면 스위치 강제 잠금 및 진행 중(g1) 고정
+		    if (progress < 100) {
+		        textSpan.textContent = '진척도 100% 필수';
+		        checkbox.checked = false;
+		        hiddenInput.value = 'g1';
+		        return;
+		    }
+		    
+		    // 2. 진척도가 100%일 때 수동 조작 허용
+		    if (checkbox.checked) {
+		        textSpan.textContent = '완료 처리';
+		        hiddenInput.value = 'g2';
+		    } else {
+		        textSpan.textContent = '진행 중';
+		        hiddenInput.value = 'g1';
+		    }
+		}
+	</script>
+	<script th:src="@{/js/milestone/milestone-tasks.js}"></script>
+	
+</section>
+
+</body>
+</html>

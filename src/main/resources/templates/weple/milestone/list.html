@@ -16,6 +16,7 @@
     <div class="milestone-page">
         <div class="milestone-page-header">
             <h1 class="milestone-page-title">마일스톤 관리</h1>
+            <a th:href="@{/project/milestone/version/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 버전 추가</a>
             <a th:href="@{/project/milestone/insert(projectId=${projectId})}" class="milestone-add-link">+ 새 마일스톤 추가</a>
         </div>
 
@@ -169,7 +170,6 @@
         </dialog>
     </div>
     
-<<<<<<< HEAD
     <script th:inline="javascript">
     function toggleStatusText(checkbox) {
         const container = checkbox.closest('.edit-mode-container');
@@ -291,8 +291,6 @@
         });
     });
 </script>
-=======
->>>>>>> 273e4ea60d0fe160f83ed9d0377a15eb83edc440
 </section>
 
 </body>

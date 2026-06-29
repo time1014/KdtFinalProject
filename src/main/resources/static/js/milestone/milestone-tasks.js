@@ -14,16 +14,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const selectedTasksPreview = document.getElementById("selectedTasksPreview");
     const selectedCountBadge = document.getElementById("selectedCount");
 
-    let tempSelectedTasks = {};
-    let confirmedTasks = {};
+    // ==========================================
+    // [수정 포인트 1] 초기 데이터 처리 (등록/수정 공통 대응)
+    // HTML에 initialTasks가 선언되어 있다면 수정 모드이므로 그 값으로 맵을 초기화합니다.
+    // ==========================================
+    let confirmedTasks = (typeof initialTasks !== 'undefined' && initialTasks) ? { ...initialTasks } : {};
+    let tempSelectedTasks = { ...confirmedTasks };
     
-    // 현재 모달창 내 상태 추적용 변수
     let currentPage = 1;
     const pageSize = 10;
 
     btnOpenModal.addEventListener("click", function() {
         taskModal.classList.add("show");
-        currentPage = 1; // 열릴 때 1페이지 초기화
+        currentPage = 1; 
         fetchUnassignedTasks(currentPage);
     });
 
@@ -34,26 +37,30 @@ document.addEventListener("DOMContentLoaded", function() {
     btnCloseModal.addEventListener("click", closeModal);
     btnCancelModal.addEventListener("click", closeModal);
 
-    // 검색 시 항상 1페이지로 새로고침
     btnSearchTasks.addEventListener("click", function() {
         currentPage = 1;
         fetchUnassignedTasks(currentPage);
     });
 
-    // 10개씩 페이징 처리된 데이터 비동기 요청 호출
 	function fetchUnassignedTasks(page) {
 	    currentPage = page;
 	    const taskStatus = document.getElementById("filterStatus").value;
 	    const priority = document.getElementById("filterPriority").value;
-	    const taskManager = document.getElementById("filterManager").value; // 텍스트 입력값 꺼내기
-	    const typeId = document.getElementById("filterTypeId").value;       // [변경] 드롭다운의 ID 값 꺼내기
+	    const taskManager = document.getElementById("filterManager").value; 
+	    const typeId = document.getElementById("filterTypeId").value;       
 
-	    // URL 파라미터 빌드 구성 조정
+	    // ==========================================
+	    // [수정 포인트 2] URL 파라미터 빌드 수정
+	    // 수정 모드일 때 milestoneId 변수가 존재한다면 서버에 같이 실어 보냅니다.
+	    // ==========================================
 	    let url = `/project/milestone/unassigned-tasks?projectId=${projectId}&page=${page}`;
+	    if (typeof milestoneId !== 'undefined' && milestoneId) {
+	        url += `&milestoneId=${milestoneId}`;
+	    }
 	    if (taskStatus) url += `&taskStatus=${encodeURIComponent(taskStatus)}`;
 	    if (priority) url += `&priority=${encodeURIComponent(priority)}`;
-	    if (taskManager) url += `&taskManager=${encodeURIComponent(taskManager)}`; // 백엔드 u.user_name 매핑 데이터
-	    if (typeId) url += `&typeId=${encodeURIComponent(typeId)}`;               // [변경] typeName 문자열 대신 고유 ID 전송
+	    if (taskManager) url += `&taskManager=${encodeURIComponent(taskManager)}`; 
+	    if (typeId) url += `&typeId=${encodeURIComponent(typeId)}`;               
 
 	    unassignedTaskListBody.innerHTML = `<tr><td colspan="6" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm"></div> 로딩 중...</td></tr>`;
 
@@ -71,7 +78,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	        });
 	}
 
-    // 리스트 가공 함수
     function renderTaskList(taskList) {
         unassignedTaskListBody.innerHTML = "";
         thCheckAll.checked = false;
@@ -107,7 +113,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // 전체 체크 토글 제어
     thCheckAll.addEventListener("change", function() {
         const checkboxes = unassignedTaskListBody.querySelectorAll(".td-task-check");
         checkboxes.forEach(cb => {
@@ -122,20 +127,18 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // [핵심] 10개 기준 동적 페이징 UI 생성 처리 함수
     function renderPagination(totalCount) {
         taskPaginationNav.innerHTML = "";
         if (totalCount <= 0) return;
 
         const totalPages = Math.ceil(totalCount / pageSize);
-        const pageBlockSize = 5; // 한 번에 표시할 페이지 번호 개수
+        const pageBlockSize = 5; 
         const currentBlock = Math.ceil(currentPage / pageBlockSize);
         
         const startPage = (currentBlock - 1) * pageBlockSize + 1;
         let endPage = currentBlock * pageBlockSize;
         if (endPage > totalPages) endPage = totalPages;
 
-        // 이전 블록 이동 버튼
         if (startPage > 1) {
             const prevLi = document.createElement("li");
             prevLi.className = "page-item";
@@ -144,7 +147,6 @@ document.addEventListener("DOMContentLoaded", function() {
             taskPaginationNav.appendChild(prevLi);
         }
 
-        // 페이지 번호 링크 나열 루프
         for (let i = startPage; i <= endPage; i++) {
             const li = document.createElement("li");
             li.className = `page-item ${i === currentPage ? 'active' : ''}`;
@@ -156,7 +158,6 @@ document.addEventListener("DOMContentLoaded", function() {
             taskPaginationNav.appendChild(li);
         }
 
-        // 다음 블록 이동 버튼
         if (endPage < totalPages) {
             const nextLi = document.createElement("li");
             nextLi.className = "page-item";
@@ -166,7 +167,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // 메인화면 최종 제출 연결 확정
     btnConfirmTasks.addEventListener("click", function() {
         confirmedTasks = { ...tempSelectedTasks };
         hiddenTasksContainer.innerHTML = "";

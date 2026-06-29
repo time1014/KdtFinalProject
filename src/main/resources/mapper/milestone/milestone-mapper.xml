@@ -249,6 +249,64 @@
         GROUP BY u.user_name
     </select>
 
+	<select id="selectById"
+            parameterType="Long"
+            resultType="com.weple.cloud.project.service.ProjectVO">
+        SELECT
+            p.project_id,
+            p.project_title,
+            p.project_describe,
+            p.created_at,
+            p.finish_date,
+            CASE
+            WHEN p.finish_date IS NOT NULL
+                 AND p.finish_date &lt;= TRUNC(SYSDATE)
+            THEN '완료'
+
+            WHEN EXISTS (
+                SELECT 1
+                FROM task t
+                WHERE t.project_id = p.project_id
+            )
+            THEN '진행 중'
+
+            ELSE '신규'
+        END AS status
+        FROM project p
+        WHERE p.project_id = #{projectId}
+    </select>
+
+	<insert id="insertVersion" parameterType="MilestoneVO">
+	    <selectKey resultType="Long" keyProperty="milestoneId" order="BEFORE">
+	        SELECT 
+	            NVL(MAX(milestone_id), 0) + 1 AS milestoneId
+	        FROM milestone
+	    </selectKey>
+	    INSERT INTO milestone (
+	        milestone_id, 
+	        project_id, 
+	        user_code, 
+	        milestone_title, 
+	        milestone_describe, 
+	        finish_date,
+	        milestone_status, 
+	        parent_milestone_id,  
+	        created_at,
+	        updated_at
+	    ) VALUES (
+	        #{milestoneId}, 
+	        #{projectId},
+	        #{userCode}, 
+	        #{milestoneTitle},
+	        #{milestoneDescribe},
+	        #{finishDate, jdbcType=DATE},
+	        #{milestoneStatus},
+	        #{parentMilestoneId}, 
+	        SYSDATE,
+	        NULL
+	    )
+	</insert>
+
     <insert id="insertMilestone" parameterType="MilestoneVO">
 	    <selectKey resultType="Long" keyProperty="milestoneId" order="BEFORE">
 	        SELECT 
@@ -263,7 +321,8 @@
 	        milestone_describe, 
 	        finish_date,
 	        milestone_status, 
-	        parent_milestone_id,  created_at,
+	        parent_milestone_id,  
+	        created_at,
 	        updated_at
 	    ) VALUES (
 	        #{milestoneId}, 
@@ -273,10 +332,17 @@
 	        #{milestoneDescribe},
 	        #{finishDate, jdbcType=DATE},
 	        #{milestoneStatus},
-	        #{parentMilestoneId, jdbcType=NUMERIC}, SYSDATE,
+	        #{parentMilestoneId, jdbcType=NUMERIC}, 
+	        SYSDATE,
 	        NULL
 	    )
 	</insert>
+	
+	<update id="clearTasksMilestoneId" parameterType="long">
+	    UPDATE task
+	    SET milestone_id = NULL
+	    WHERE milestone_id = #{milestoneId}
+	</update>
 	
 	<update id="updateTasksMilestoneId">
 	    UPDATE task
@@ -305,8 +371,11 @@
 	    FROM task t
 	    LEFT OUTER JOIN users u      ON t.task_manager = u.user_code
 	    LEFT OUTER JOIN task_types tt ON t.type_id = tt.type_id
-	    WHERE t.milestone_id IS NULL 
-	      AND t.project_id = #{projectId}
+	    WHERE t.project_id = #{projectId}
+	      AND (t.milestone_id IS NULL 
+	          <if test="milestoneId != null">
+	          OR t.milestone_id = #{milestoneId}
+	          </if>)
 	      <if test="taskStatus != null and taskStatus != ''">
 	      AND t.task_status = #{taskStatus}
 	      </if>
@@ -321,7 +390,6 @@
 	      </if>
 	</select>
 	
-	<!-- 연결안된 일감 데이터 조회 -->
 	<select id="selectUnassignedTasks" resultType="TaskVO">
 	    SELECT * FROM (
 	        SELECT a.*, ROWNUM AS rnum FROM (
@@ -336,12 +404,16 @@
 	                t.start_date       AS startDate,
 	                t.finish_date      AS finishDate,
 	                t.task_progress    AS taskProgress,
-	                t.project_id       AS projectId
+	                t.project_id       AS projectId,
+	                t.milestone_id     AS milestoneId
 	            FROM task t
 	            LEFT OUTER JOIN users u      ON t.task_manager = u.user_code
 	            LEFT OUTER JOIN task_types tt ON t.type_id = tt.type_id
-	            WHERE t.milestone_id IS NULL 
-	              AND t.project_id = #{projectId}
+	            WHERE t.project_id = #{projectId}
+	              AND (t.milestone_id IS NULL 
+	                  <if test="milestoneId != null">
+	                  OR t.milestone_id = #{milestoneId}
+	                  </if>)
 	              <if test="taskStatus != null and taskStatus != ''">
 	              AND t.task_status = #{taskStatus}
 	              </if>
@@ -365,8 +437,68 @@
 	    FROM task_types 
 	    ORDER BY type_id ASC
 	</select>
+	
+	<select id="selectMilestoneInfoById" parameterType="long" resultType="MilestoneInfoVO">
+	    WITH task_stats AS (
+	        SELECT 
+	            milestone_id,
+	            ROUND(AVG(NVL(task_progress, 0))) AS progress_percentage
+	        FROM task
+	        WHERE milestone_id = #{milestoneId}
+	        GROUP BY milestone_id
+	    )
+	    SELECT 
+	        m.milestone_id        AS milestoneId,
+	        m.project_id          AS projectId,
+	        m.user_code           AS userCode,
+	        m.milestone_title     AS milestoneTitle,
+	        m.milestone_describe  AS milestoneDescribe,
+	        m.finish_date         AS finishDate,
+	        m.milestone_status    AS milestoneStatus,
+	        m.parent_milestone_id AS parentMilestoneId,
+	        NVL(ts.progress_percentage, 0) AS progressPercentage
+	    FROM milestone m
+	    LEFT JOIN task_stats ts ON m.milestone_id = ts.milestone_id
+	    WHERE m.milestone_id = #{milestoneId}
+	</select>
 
-    <update id="updateMilestone" parameterType="MilestoneVO">
+	<select id="selectConnectedTaskList" parameterType="long" resultType="TaskVO">
+	    SELECT 
+	        t.task_id          AS taskId,
+	        t.task_title       AS taskTitle,
+	        t.task_status      AS taskStatus,
+	        t.priority         AS priority,
+	        u.user_name        AS taskManager,   
+	        tt.type_name       AS typeName
+	    FROM task t
+	    LEFT OUTER JOIN users u      ON t.task_manager = u.user_code
+	    LEFT OUTER JOIN task_types tt ON t.type_id = tt.type_id
+	    WHERE t.milestone_id = #{milestoneId}
+	    ORDER BY t.created_at DESC
+	</select>
+
+	<select id="selectMilestoneListForUpdate" resultType="MilestoneVO">
+	    SELECT 
+	        milestone_id       AS milestoneId,
+	        milestone_title    AS milestoneTitle
+	    FROM milestone
+	    WHERE project_id = #{projectId}
+	      AND parent_milestone_id IS NULL
+	      AND milestone_id != #{milestoneId}
+	    ORDER BY created_at DESC
+	</select>
+
+	<update id="updateMilestone" parameterType="MilestoneVO">
+	    UPDATE milestone
+	    SET milestone_title = #{milestoneTitle},
+	        milestone_describe = #{milestoneDescribe},
+	        finish_date = #{finishDate, jdbcType=DATE},
+	        parent_milestone_id = #{parentMilestoneId, jdbcType=NUMERIC},
+	        updated_at = SYSDATE
+	    WHERE milestone_id = #{milestoneId}
+	</update>
+
+    <update id="updateParentMilestone" parameterType="MilestoneVO">
         UPDATE milestone
         SET 
             milestone_title = #{milestoneTitle},

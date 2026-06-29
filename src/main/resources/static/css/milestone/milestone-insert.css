@@ -182,3 +182,61 @@
 	border-radius: 8px;
 	border: 1px solid #e2e8f0;
 }
+
+
+/* 스위치 컨테이너 부모 */
+.switch-control {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  margin: 0;
+}
+
+/* 기본 체크박스는 화면에서 숨김 */
+.switch-control input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* 스위치의 배경 (비활성화/진행 중일 때 회색) */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+/* 스위치 내부의 동그란 버튼 */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* 체크박스가 켜졌을 때 배경색 (완료 처리 - 활성화 색상) */
+.switch-control input:checked + .slider {
+  background-color: #2563eb; /* 신뢰감을 주는 파란색 (원하는 색상으로 변경 가능) */
+}
+
+/* 체크박스가 켜졌을 때 동그라미 버튼 이동 경로 */
+.switch-control input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* 진척도 100% 미만이라 disabled(잠금) 상태일 때 스위치 스타일 */
+.switch-control input:disabled + .slider {
+  background-color: #e2e8f0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}

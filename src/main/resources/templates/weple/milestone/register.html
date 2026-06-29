@@ -43,14 +43,15 @@
 			
 			<div class="row" style="margin-bottom: 20px;">
 			    <div class="col-md-6">
-			        <label class="form-label">상위 마일스톤</label>
-			        <select class="form-select" name="parentMilestoneId">
-			            <option value="">-- 없음 (최상위 마일스톤) --</option>
+			        <label class="form-label">버전 선택 <span class="text-danger">*</span></label>
+			        <select class="form-select" name="parentMilestoneId" required>
+			        	<option value="" selected disabled>버전을 선택해주세요</option>
 			            <option th:each="parent : ${parentMilestoneList}" 
 			                    th:value="${parent.milestoneId}" 
 			                    th:text="${parent.milestoneTitle}">
 			            </option>
-			        </select>
+			         </select>
+			         
 			    </div>
 			</div>
 
@@ -72,7 +73,6 @@
 			</div>
 		</form>
 	</div>
-<<<<<<< HEAD
 
 	<div id="taskModal" class="custom-modal">
 		<div class="custom-modal-content">
@@ -155,9 +155,7 @@
 		const projectId = /*[[${projectId}]]*/ null;
 	</script>
 	<script th:src="@{/js/milestone/milestone-tasks.js}"></script>
-=======
 	
->>>>>>> 273e4ea60d0fe160f83ed9d0377a15eb83edc440
 </section>
 
 </body>

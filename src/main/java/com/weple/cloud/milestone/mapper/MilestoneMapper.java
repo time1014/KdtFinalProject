@@ -8,6 +8,7 @@ import com.weple.cloud.milestone.service.MilestoneDetailVO;
 import com.weple.cloud.milestone.service.MilestoneInfoVO;
 import com.weple.cloud.milestone.service.MilestoneVO;
 import com.weple.cloud.milestone.service.TaskGroupStatVO;
+import com.weple.cloud.project.service.ProjectVO;
 import com.weple.cloud.system.service.TaskTypeVO;
 import com.weple.cloud.task.service.TaskVO;
 
@@ -32,8 +33,14 @@ public interface MilestoneMapper {
     List<TaskGroupStatVO> selectTaskTypeStats(@Param("projectId")Long projectId, @Param("milestoneId") Long milestoneId);
     List<TaskGroupStatVO> selectTaskManagerStats(@Param("projectId")Long projectId, @Param("milestoneId") Long milestoneId);
 	
+    
+    // 단건 조회
+ 	public ProjectVO selectById(Long projectId);
+    
+    // 버전 등록
+ 	public int insertVersion(MilestoneVO milestoneVO);
 	
-	// 등록
+	// 마일스톤 등록
 	public int insertMilestone(MilestoneVO milestoneVO);
 	
 	// 마일스톤에 연결한 일감 업데이트
@@ -50,7 +57,8 @@ public interface MilestoneMapper {
     List<TaskTypeVO> selectTaskTypeList();
 
     List<TaskVO> selectUnassignedTasks(
-        @Param("projectId") Long projectId, 
+        @Param("projectId") Long projectId,
+        @Param("milestoneId") Long milestoneId,
         @Param("startRow") int startRow, 
         @Param("endRow") int endRow, 
         @Param("taskStatus") String taskStatus, 
@@ -61,14 +69,27 @@ public interface MilestoneMapper {
 
     int selectUnassignedTasksCount(
         @Param("projectId") Long projectId, 
+        @Param("milestoneId") Long milestoneId,
         @Param("taskStatus") String taskStatus, 
         @Param("priority") String priority, 
         @Param("taskManager") String taskManager, 
         @Param("typeId") Long typeId
     );
 	
+    
+    int updateMilestone(MilestoneVO milestoneVO);
+    
+    int clearTasksMilestoneId(Long milestoneId);
+    
+    MilestoneVO selectMilestoneInfoById(Long milestoneId);
+    
+    List<TaskVO> selectConnectedTaskList(Long milestoneId);
+    
+    List<MilestoneVO> selectMilestoneListForUpdate(@Param("projectId") Long projectId, @Param("milestoneId") Long milestoneId);
+    
+    
 	// 수정
-	public void updateMilestone(MilestoneVO milestoneVO);
+	public void updateParentMilestone(MilestoneVO milestoneVO);
 	
 	// 삭제
 	public int deleteMilestone(Long milestoneId);
