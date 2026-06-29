@@ -29,8 +29,8 @@
 						✏️ 수정</button>
 
 					<button class="btn btn-log"
-						th:onclick="|location.href='@{/projectTimeList(projectId=${projectId})}'|">⏱️
-						작업시간 기록</button>
+						    th:onclick="|location.href='@{/projectTimeList(projectId=${projectId}, taskId=*{taskId})}'|">⏱️
+						    소요시간 기록</button>
 
 					<button type="button" class="btn btn-delete task-delete-trigger"
 						th:if="${isAdminOrOwner} or ${taskPerms.k3Delete != null}"
