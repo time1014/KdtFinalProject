@@ -32,8 +32,9 @@
         	<a href="#">간트차트</a>
         </li>
         
-        <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b12')}">
-        	<a href="#">테스트</a>
+        <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b12')}"
+        	th:classappend="${currentMenu == 'testcase'} ? 'active' : ''">
+        	<a th:href="@{/project/testcase(projectId=${projectId})}">테스트</a>
         </li>
         
         <li th:if="${moduleNames != null and #lists.contains(moduleNames, 'b7')}"
