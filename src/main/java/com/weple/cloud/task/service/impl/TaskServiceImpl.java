@@ -314,6 +314,7 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public List<TaskHistoryDTO> taskUpdateHistory(String tId) {
 	    List<TaskUpdateHistoryVO> list = taskMapper.taskUpdateHistory(tId);
+	    System.out.println("서비스쪽 : " +list);
 
 	    Map<Long, TaskHistoryDTO> hisMap = new LinkedHashMap<>();
 
@@ -324,6 +325,7 @@ public class TaskServiceImpl implements TaskService {
 	        if (historyDTO == null) {
 	            historyDTO = new TaskHistoryDTO();
 	            historyDTO.setHistoryId(value.getHistoryId());
+	            historyDTO.setActionType(value.getActionType());
 	            historyDTO.setUserName(value.getUserName());
 	            historyDTO.setActionAt(value.getActionAt());
 	            historyDTO.setDetails(new ArrayList<>());
