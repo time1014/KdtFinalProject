@@ -23,7 +23,7 @@
 				type="button"
 				th:onclick="|location.href='@{/project/task/insert(projectId=${param.projectId})}'|"
 				class="btn btn-sm text-primary fw-bold"
-				style="background: none; border: none; color: #3b82f6; font-weight: bold;">
+				style="background: none; border: none; color: #5747E6; font-weight: bold;">
 				+ 새 일감만들기</button>
 		</div>
 
@@ -145,7 +145,7 @@
 					<div style="margin: 0 auto; margin-left: 47%;"></div>
 					<div style="display: flex; gap: 8px;">
 						<button type="button" class="btn-pill-light"
-							th:onclick="|location.href='@{/project/task(projectId=${param.projectId})}'|">🔄
+							th:onclick="|location.href='@{/project/task(projectId=${param.projectId})}'|">
 							지우기</button>
 						<button type="submit" class="btn-pill-primary"
 							onclick="document.getElementById('pageInput').value=1;">적용</button>

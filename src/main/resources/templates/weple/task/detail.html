@@ -112,7 +112,7 @@
 								<span style="color: rgb(127, 127, 127); font-weight: bold;">버전아이디:</span>
 								<a th:href="@{/project/download/{id}(id=${file.versionId})}"
 									class="file-link"
-									th:text="|${file.logicalName} - version ${file.versionNumber}|"></a>
+									th:text="|${file.logicalName} - V ${file.versionNumber}|"></a>
 								<span class="file-size" th:text="${file.fileSize} + ' bytes'"></span>
 							</div>
 							<span class="file-date"
