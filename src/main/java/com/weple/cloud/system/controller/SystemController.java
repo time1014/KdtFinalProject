@@ -286,7 +286,7 @@ public class SystemController {
 		// 프로젝트 탭이 활성화되지 않도록 현재 관리 메뉴를 가입승인으로 지정합니다.
 		model.addAttribute("currentMenu", "approval");
 		model.addAttribute("menu", "approval");
-		return "weple/admin/config/join-request";
+		return "weple/admin/signup-approval/list";
 	}
 
 	// 요청 URL의 사용자 코드만 받고 회사 정보는 로그인 세션에서 가져와 승인합니다.
@@ -742,6 +742,7 @@ public class SystemController {
 			return "redirect:/userList/" + userCode;
 		}
 
+		model.addAttribute("groupList", findCompanyGroups(companyId));
 		model.addAttribute("userDetail", userDetail);
 		model.addAttribute("isCompanyOwner", isCompanyOwner);
 		model.addAttribute("sidebarMenu", "system");
@@ -823,6 +824,13 @@ public class SystemController {
 		}
 		return !Integer.valueOf(1).equals(userDetail.getOwnerYn())
 				&& !Integer.valueOf(1).equals(userDetail.getAdminYn());
+	}
+
+	private List<SystemGroupVO> findCompanyGroups(Long companyId) {
+		return groupService.findGroupAll(null).stream()
+				.filter(group -> companyId != null && group.getCompanyId() != null
+						&& companyId.intValue() == group.getCompanyId())
+				.toList();
 	}
 		
 }
