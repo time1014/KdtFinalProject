@@ -325,3 +325,22 @@
 .tc-btn-delete:not(:disabled):hover {
     background: #dc2626;
 }
+
+#connectTask {
+    color: #5B4FEA;
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+#connectTask:hover {
+    color: #4838D1;
+    text-decoration: underline;
+}
+
+#connectTask:active {
+    color: #3A2BB5;
+}
+
+#connectTask:visited {
+    color: #5B4FEA;
+}

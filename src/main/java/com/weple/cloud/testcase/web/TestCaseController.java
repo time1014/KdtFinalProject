@@ -268,6 +268,7 @@ public class TestCaseController {
     	model.addAttribute("loginUserCode",userCode);
     	model.addAttribute("testCaseDetail",testCaseDetail);
     	model.addAttribute("projectId", projectId);
+    	model.addAttribute("taskId",testCaseDetail.getTaskId());
         model.addAttribute("testId", testId);
         model.addAttribute("currentMenu", "testcase");
         model.addAttribute("project", projectService.findById(String.valueOf(pId)));

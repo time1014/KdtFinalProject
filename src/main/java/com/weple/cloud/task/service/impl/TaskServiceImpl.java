@@ -82,6 +82,12 @@ public class TaskServiceImpl implements TaskService {
 	public List<TaskMilestoneVO> findMilestone(Long pId) {
 		return taskMapper.taskMilestones(pId);
 	}
+	//해당 프로젝트 기간
+	@Override
+	public TaskProjectSelectVO findprojectPeriod(Long pId) {
+		
+		return taskMapper.projectPeriod(pId);
+	}
 	
 	// 등록
 	@Override
@@ -386,6 +392,7 @@ public class TaskServiceImpl implements TaskService {
 		
 		return taskMapper.taskTestCaseList(tId, pId);
 	}
+
 }
 
 

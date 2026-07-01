@@ -5,6 +5,18 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 };
 
+const projectStart = document.getElementById("projectStartDate").value;
+const projectFinish = document.getElementById("projectFinishDate").value;
+
+const startDate = document.getElementById("startDate");
+const finishDate = document.getElementById("finishDate");
+
+startDate.min = projectStart;
+startDate.max = projectFinish;
+
+finishDate.min = projectStart;
+finishDate.max = projectFinish;
+
 
 const startDateInput = document.getElementById('startDate');
     const finishDateInput = document.getElementById('finishDate');
@@ -209,3 +221,4 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+

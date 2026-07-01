@@ -178,7 +178,15 @@ public class TaskController {
 				if (!isAdminOrOwner && !isInsertAble) {
 					return "weple/access-denide";
 				}
-
+				
+		// 시작일 마감일 선택 범위 프로젝트 기간
+		TaskProjectSelectVO projectPeriod = taskService.findprojectPeriod(pId);		
+	
+		
+		memberList.removeIf(member -> member.getUserCode().equals(userCode));
+		
+		
+		model.addAttribute("projectPeriod" , projectPeriod);
 	    // nav 일감 돌아가기 위해서 projectId 넘김
 		model.addAttribute("projectId", pId);
 	    // 내게 할당에서 현재 로그인 정보 확인
@@ -233,7 +241,7 @@ public class TaskController {
 	    	    null, createdTask.getParentTaskTitle()
 	    	);
 	    
-	    return "redirect:/project/task?projectId=" + pId;
+	    return "redirect:/project/task/detail/" + taskVO.getTaskId() + "?projectId=" + pId;
 	}
 	
 	//일감 상세조회 값 로드
@@ -482,6 +490,8 @@ public class TaskController {
 	    if (!isProjectMember && !isAdminOrOwner) {
 	        return "weple/access-denide";
 	    }
+	    
+	    
 
 	    // 수정할 일감 조회
 	    TaskVO taskDetail = taskService.findTaskDetail(tId);
@@ -513,6 +523,7 @@ public class TaskController {
 	            }
 	        }
 	    }
+	    memberList.removeIf(member -> member.getUserCode().equals(userCode));
 
 	    model.addAttribute("currentMenu", "task");
 	    model.addAttribute("projectId", pId);

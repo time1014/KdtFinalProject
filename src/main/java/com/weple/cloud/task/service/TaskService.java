@@ -22,6 +22,8 @@ public interface TaskService {
 	
 	public List<TaskMilestoneVO> findMilestone(Long pId);
 	
+	public TaskProjectSelectVO findprojectPeriod(Long pId);
+	
 	public int insertTask(TaskVO taskVO , List<MultipartFile> files)throws Exception;
 	
 	public TaskVO findTaskDetail(String tId);
