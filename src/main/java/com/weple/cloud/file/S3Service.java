@@ -20,13 +20,16 @@ public class S3Service {
     private String bucket;
 
     // 업로드: savedName은 S3 안에서의 키(파일명)로 사용
-    public void uploadFile(MultipartFile file, String savedName) throws IOException {
+    public String uploadFile(MultipartFile file, String savedName) throws IOException {
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(savedName)
                 .contentType(file.getContentType())
                 .build();
         s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        
+        // S3 퍼블릭 URL 반환
+        return "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/" + savedName;
     }
 
     // 다운로드: InputStream 반환

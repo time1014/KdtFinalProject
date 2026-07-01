@@ -846,23 +846,30 @@ public class SystemController {
 	    List<SystemModuleVO> moduleList = systemModuleService.findModuleAll();
 	    List<String> enabledCodes = systemModuleService.findEnabledModuleCodes(companyId);
 	    List<TaskTypeVO> taskTypeList = taskTypeService.findTaskTypeAll(companyId);
+	    List<String> enabledTaskTypeIds = systemModuleService.findEnabledTaskTypeIds(companyId);
 
 	    model.addAttribute("moduleList", moduleList);
 	    model.addAttribute("enabledCodes", enabledCodes); // 이미 저장된 것 체크 표시용
 	    model.addAttribute("taskTypeList", taskTypeList);
+	    model.addAttribute("enabledTaskTypeIds", enabledTaskTypeIds); // 이미 저장된 일감유형 체크 표시용
 	    model.addAttribute("sidebarMenu", "system");
-	    model.addAttribute("currentMenu", "systemproject");
+	    model.addAttribute("currentMenu", "setting");
+	    model.addAttribute("menu", "setting");
+	    // 설정 화면 내 하위 탭(프로젝트/저장소) 중 프로젝트 탭 활성 표시함
+	    model.addAttribute("settingTab", "project");
 	    return "weple/system/systemModules";
 	}
 
 	@PostMapping("/system/systemModules")
 	public String systemInsertModulesProcess(@AuthenticationPrincipal LoginUserDetails loginUser,
 	                                          @RequestParam(value = "enabledModules", required = false) List<String> enabledModules,
+	                                          @RequestParam(value = "enabledTaskTypes", required = false) List<String> enabledTaskTypes,
 	                                          RedirectAttributes redirectAttributes) {
 	    Long companyId = loginUser.getLoginUser().getCompanyId();
 
 	    try {
 	        systemModuleService.saveEnabledModules(companyId, enabledModules);
+	        systemModuleService.saveEnabledTaskTypes(companyId, enabledTaskTypes);
 	        redirectAttributes.addFlashAttribute("toastType", "success");
 	        redirectAttributes.addFlashAttribute("toastMessage", "모듈 설정이 저장되었습니다.");
 	    } catch (Exception e) {
