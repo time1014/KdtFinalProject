@@ -3,6 +3,7 @@ package com.weple.cloud.time.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.weple.cloud.admin.service.UserService;
 import com.weple.cloud.admin.service.UserVO;
+import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.project.service.ProjectVO;
 import com.weple.cloud.system.service.CodeValueService;
@@ -69,7 +71,8 @@ public class TimeController {
 	// 등록 폼
 	@GetMapping("/insertProjectTime")
 	public String insertProjectTimeForm(@RequestParam(value="projectId", required=false) Long projectId,
-										@RequestParam(value="taskId", required=false) String taskId, Model model) {
+										@RequestParam(value="taskId", required=false) String taskId, Model model,
+										@AuthenticationPrincipal LoginUserDetails loginUser) {
 		List<ProjectVO> projectList = projectService.findAll("");
 		
 	    // 프로젝트 조회, 만약 조회 결과가 없으면 빈 객체라도 생성
@@ -101,7 +104,7 @@ public class TimeController {
 	    }
 	    
 	    //작업분류에 있는 null 제외하고, 사용중(Y)인 것만 불러옴
-	    List<CodeValueVO> workTypeList = codeValueService.findCodeValueAll();
+	    List<CodeValueVO> workTypeList = codeValueService.findCodeValueAll(loginUser.getLoginUser().getCompanyId());
 	    workTypeList = workTypeList.stream()
 	    		.filter(vo -> vo.getWorkName() != null && !vo.getWorkName().isEmpty())
 	    		.filter(vo -> "Y".equals(vo.getUsingYn()))
@@ -160,12 +163,13 @@ public class TimeController {
 	// 수정 폼
 	@GetMapping("/updateProjectTime")
 	public String updateProjectTimeForm(@RequestParam("workId") long workId,
-										@RequestParam(value="projectId", required=false) Long projectId, Model model) {
+										@RequestParam(value="projectId", required=false) Long projectId, Model model,
+										@AuthenticationPrincipal LoginUserDetails loginUser) {
 		WorkTimeVO workTime = timeService.findProjectTimeOne(workId);
 		if (workTime == null) return "redirect:/projectTimeList";
 
 		// 작업분류 목록 (사용중인 것 중, 이 프로젝트가 사용 선택한 것만)
-		List<CodeValueVO> workTypeList = codeValueService.findCodeValueAll().stream()
+		List<CodeValueVO> workTypeList = codeValueService.findCodeValueAll(loginUser.getLoginUser().getCompanyId()).stream()
 			.filter(vo -> vo.getWorkName() != null && !vo.getWorkName().isEmpty())
 			.filter(vo -> "Y".equals(vo.getUsingYn()))
 			.collect(Collectors.toList());
