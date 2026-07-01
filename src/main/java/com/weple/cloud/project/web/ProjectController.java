@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.project.service.ProjectService;
 import com.weple.cloud.project.service.ProjectVO;
 
@@ -24,6 +26,8 @@ import com.weple.cloud.project.service.ProjectVO;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private static final String PERM_SELECT  = "k1_select";  // 모듈 설정 저장
+    private static final String PERM_CREATE  = "k1_create";  // 프로젝트 생성/편집
 
     // 전체 모듈 목록
     // module_mapping 테이블의 module_name 값과 동일하게 맞춰야 함
@@ -51,6 +55,23 @@ public class ProjectController {
             ALL_MODULES.add(map);
         }
     }
+    
+    private Set<String> findProjectPermissions(LoginUserDetails loginUser, Long projectId) {
+        com.weple.cloud.auth.service.LoginUserVO user = loginUser.getLoginUser();
+        if (isCompanyManager(user)) {
+            return Set.of(PERM_SELECT, PERM_CREATE);
+        }
+        return projectService.findProjectPermissionCodes(user.getUserCode(), projectId);
+    }
+
+    private boolean hasPerm(Set<String> perms, String code) {
+        return perms != null && perms.contains(code);
+    }
+
+    private boolean isCompanyManager(com.weple.cloud.auth.service.LoginUserVO user) {
+        return Integer.valueOf(1).equals(user.getOwnerYn())
+            || Integer.valueOf(1).equals(user.getAdminYn());
+    }
 
     @Autowired
     public ProjectController(ProjectService projectService) {
@@ -60,22 +81,36 @@ public class ProjectController {
     // 프로젝트 목록 조회(페이징)
     @GetMapping("/project")
     public String projectList(
+    		@AuthenticationPrincipal LoginUserDetails loginUser,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", defaultValue = "1") int page,
             Model model) {
 
         int pageSize = 10;
         int offset = (page - 1) * pageSize;
+        
+        String userCode = loginUser.getLoginUser().getUserCode();
+        boolean isManager = isCompanyManager(loginUser.getLoginUser());
 
-        List<ProjectVO> list = projectService.findAll(keyword, offset, pageSize);
-        int totalCount = projectService.countAll(keyword);
+        List<ProjectVO> list;
+        int totalCount;
+
+        if (isManager) {
+            // 관리자는 전체 프로젝트 조회
+            list       = projectService.findAll(keyword, offset, pageSize);
+            totalCount = projectService.countAll(keyword);
+        } else {
+            // 일반 사용자는 참여 중인 프로젝트만 조회
+            list       = projectService.findAllByMember(userCode, keyword, offset, pageSize);
+            totalCount = projectService.countAllByMember(userCode, keyword);
+        }
+        
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
         model.addAttribute("projects", list);
         model.addAttribute("keyword", keyword);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
-
         model.addAttribute("sidebarMenu", "project");
         model.addAttribute("currentMenu", "none");
         return "weple/project/list";
@@ -83,7 +118,26 @@ public class ProjectController {
 
     // 설정 페이지 - 프로젝트 탭 조회
     @GetMapping("/project/{projectId}/setting")
-    public String settingPage(@PathVariable Long projectId, Model model) {
+    public String settingPage(
+    		@AuthenticationPrincipal LoginUserDetails loginUser,
+    		@PathVariable Long projectId,
+    		Model model) {
+    	
+    	try {
+            if (!isCompanyManager(loginUser.getLoginUser())
+                    && !projectService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
+                return "weple/access-denide";
+            }
+        } catch (Exception e) {
+            return "weple/access-denide";
+        }
+    	
+    	// 멤버도 관리자도 아니면 차단
+        if (!isCompanyManager(loginUser.getLoginUser())
+                && !projectService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
+            return "weple/access-denide";
+        }
+        Set<String> perms = findProjectPermissions(loginUser, projectId);
 
         // 관리에서 선택된 모듈 전체 목록 (체크박스 표시 기준, is_active 무관)
         List<String> adminModules = projectService.findModuleNames(projectId);
@@ -123,16 +177,22 @@ public class ProjectController {
         model.addAttribute("currentMenu", "setting");
         model.addAttribute("activeTab", "project");
         model.addAttribute("settingMenu", "project");
+        model.addAttribute("canSaveSetting", hasPerm(perms, PERM_SELECT));
         return "weple/project/setting";
     }
 
     // 설정 페이지 - 프로젝트 탭 저장
     @PostMapping("/project/{projectId}/setting")
-    public String saveSetting(@PathVariable Long projectId,
-                              @ModelAttribute ProjectVO vo,
-                              RedirectAttributes ra) {
+    public String saveSetting(
+    		@AuthenticationPrincipal LoginUserDetails loginUser, 
+    		@PathVariable Long projectId,
+            @ModelAttribute ProjectVO vo,
+            RedirectAttributes ra) {
+    	
+    	Set<String> perms = findProjectPermissions(loginUser, projectId);
+        if (!hasPerm(perms, PERM_SELECT)) return "weple/access-denide";
+        
         vo.setProjectId(projectId);
-
         // b11(설정)은 항상 강제 포함
         List<String> modules = vo.getModuleNames();
         if (modules == null) modules = new ArrayList<>();

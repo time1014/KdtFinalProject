@@ -64,9 +64,7 @@
 	<!-- 알림 생성 전 수신자의 알림 수신 범위/이메일 연동 설정 조회 (신규 컬럼 없이 기존 USERS 컬럼만 사용) -->
 	<select id="selectNotificationPreference" resultType="com.weple.cloud.notification.service.NotificationPreferenceVO">
 		SELECT user_code AS userCode,
-		       email AS email,
 		       NVL(notification_area, 'all') AS notificationArea,
-		       NVL(email_notification_yn, 'N') AS emailNotificationYn
 		FROM users
 		WHERE user_code = #{userCode}
 	</select>

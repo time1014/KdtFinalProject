@@ -1,8 +1,10 @@
 package com.weple.cloud.project.web;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.notification.service.AlarmType;
 import com.weple.cloud.notification.service.NotificationService;
 import com.weple.cloud.project.service.ProjectMemberRoleVO;
@@ -27,12 +30,47 @@ public class ProjectMemberController {
     private final ProjectMemberService memberService;
     private final ProjectService projectService;
     private final NotificationService notificationService;
+    private static final String PERM_MEMBER = "k1_member";
+    
+    private Set<String> findMemberPermissions(LoginUserDetails loginUser, Long projectId) {
+        com.weple.cloud.auth.service.LoginUserVO user = loginUser.getLoginUser();
+        if (isCompanyManager(user)) {
+            return Set.of(PERM_MEMBER);
+        }
+        return memberService.findProjectPermissionCodes(user.getUserCode(), projectId);
+    }
+
+    private boolean hasPerm(Set<String> perms, String code) {
+        return perms != null && perms.contains(code);
+    }
+
+    private boolean isCompanyManager(com.weple.cloud.auth.service.LoginUserVO user) {
+        return Integer.valueOf(1).equals(user.getOwnerYn())
+            || Integer.valueOf(1).equals(user.getAdminYn());
+    }
 
     //  설정 > 구성원 탭
     @GetMapping("/project/settings/members")
     public String membersPage(
+    		@AuthenticationPrincipal LoginUserDetails loginUser,
             @RequestParam Long projectId,
             Model model) {
+    	
+    	try {
+            if (!isCompanyManager(loginUser.getLoginUser())
+                    && !memberService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
+                return "weple/access-denide";
+            }
+        } catch (Exception e) {
+            return "weple/access-denide";
+        }
+    	
+    	Set<String> perms = findMemberPermissions(loginUser, projectId);
+        // 멤버도 아니고 관리자도 아니면 차단
+        if (!isCompanyManager(loginUser.getLoginUser())
+                && !memberService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
+            return "weple/access-denide";
+        }
 
         List<ProjectMemberVO> memberList = memberService.findMemberList(projectId);
         List<ProjectMemberRoleVO> roleList   = memberService.findRoleList();
@@ -48,6 +86,7 @@ public class ProjectMemberController {
         model.addAttribute("groupList", groupList);
         model.addAttribute("activeTab", "member");
         model.addAttribute("settingMenu", "member");
+        model.addAttribute("canManageMember", hasPerm(perms, PERM_MEMBER));
 
         return "weple/project/members";
     }
@@ -76,9 +115,15 @@ public class ProjectMemberController {
     @PostMapping("/project/settings/members/add")
     @ResponseBody
     public ResponseEntity<String> addMember(
+    		@AuthenticationPrincipal LoginUserDetails loginUser,
             @RequestParam Long projectId,
             @RequestParam String userCode,
             @RequestParam Long roleId) {
+    	
+    	 Set<String> perms = findMemberPermissions(loginUser, projectId);
+         if (!hasPerm(perms, PERM_MEMBER)) {
+             return ResponseEntity.status(403).body("구성원 관리 권한이 없습니다.");
+         }
 
         ProjectMemberVO vo = new ProjectMemberVO();
         vo.setProjectId(projectId);
@@ -109,8 +154,14 @@ public class ProjectMemberController {
     @PostMapping("/project/settings/members/delete")
     @ResponseBody
     public ResponseEntity<String> deleteMember(
+    		@AuthenticationPrincipal LoginUserDetails loginUser,
             @RequestParam Long memberId,
             @RequestParam Long projectId) {
+    	
+    	Set<String> perms = findMemberPermissions(loginUser, projectId);
+        if (!hasPerm(perms, PERM_MEMBER)) {
+            return ResponseEntity.status(403).body("구성원 관리 권한이 없습니다.");
+        }
 
         try {
             memberService.removeMember(memberId, projectId);

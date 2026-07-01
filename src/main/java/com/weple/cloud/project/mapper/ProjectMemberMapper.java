@@ -45,4 +45,12 @@ public interface ProjectMemberMapper {
 
     // memberId로 단건 조회
 	public ProjectMemberVO selectMemberById(@Param("memberId") Long memberId);
+	
+	public List<String> selectProjectPermissionCodes(
+		    @Param("userCode") String userCode,
+		    @Param("projectId") Long projectId);
+
+	public boolean isMember(
+		    @Param("userCode") String userCode,
+		    @Param("projectId") Long projectId);
 }

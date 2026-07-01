@@ -75,7 +75,15 @@ public class SecurityConfig {
                 // 관리 설정탭 접근은 기업 최고관리자 또는 관리자만 사용할 수 있음
                 .requestMatchers("/settingDetail")
                 .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
-
+                
+                // 역할·권한 관리는 기업 최고관리자 또는 관리자만 접근할 수 있음-은
+                .requestMatchers("/system/role", "/system/role/**")
+                .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
+                
+                // 관리 페이지 내부 프로젝트 생성·수정·목록은 기업 최고관리자 또는 관리자만 접근할 수 있음-은
+                .requestMatchers("/system/project", "/system/project/**")
+                .hasAnyAuthority("ROLE_COMPANY_OWNER", "ROLE_COMPANY_ADMIN")
+                
                 // 그 외 요청은 로그인 필요
                 .anyRequest().authenticated()
             )

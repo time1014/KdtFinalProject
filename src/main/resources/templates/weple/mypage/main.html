@@ -62,21 +62,6 @@
                 </label>
             </div>
 
-            <div class="mypage-notice-row">
-                <div>
-                    <strong>이메일 알림 수신 연동</strong>
-                    <p th:text="'등록된 이메일 계정(' + ${myPage.email} + ')으로 알림을 수신합니다.'">
-                        등록된 이메일 계정으로 알림을 수신합니다.
-                    </p>
-                </div>
-                <label class="mypage-status-switch">
-                    <input type="hidden" name="emailNotificationYn" value="N">
-                    <input type="checkbox" name="emailNotificationYn" value="Y"
-                           th:checked="${myPage.emailNotificationYn == 'Y'}">
-                    <span></span>
-                </label>
-            </div>
-
             <div class="mypage-scope-block">
                 <strong>알림 수신 범위 설정</strong>
                 <p>어떤 조건의 업무 알림을 받을지 범위를 선택합니다.</p>

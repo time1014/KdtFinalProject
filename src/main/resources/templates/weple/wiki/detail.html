@@ -33,8 +33,9 @@
                                onchange="this.form.submit()">
                     </div>
                 </form>
-                <a th:href="@{/project/wiki/register(projectId=${projectId})}"
-                   class="wiki-add-btn">등록</a>
+                <a th:if="${canEdit}"
+				   th:href="@{/project/wiki/register(projectId=${projectId})}"
+				   class="wiki-add-btn">등록</a>
             </div>
 
             <div class="wiki-tree-wrap">
@@ -98,13 +99,15 @@
                         </div>
                     </div>
                     <div class="wiki-doc-actions" th:unless="${isVersionView}">
-                        <a th:href="@{/project/wiki/modify/{id}(id=${selectedWiki.wikiPageId}, projectId=${projectId})}"
-                           class="wiki-btn wiki-btn-edit">수정</a>
-                        <button type="button" class="wiki-btn wiki-btn-delete"
-                                onclick="wikiConfirm('정말 삭제하시겠습니까?', '삭제된 위키는 복구할 수 없습니다.', function(){ document.getElementById('deleteForm').submit(); })">
-                            삭제
-                        </button>
-                    </div>
+					    <a th:if="${canEdit}"
+					       th:href="@{/project/wiki/modify/{id}(id=${selectedWiki.wikiPageId}, projectId=${projectId})}"
+					       class="wiki-btn wiki-btn-edit">수정</a>
+					    <button th:if="${canDelete}"
+					            type="button" class="wiki-btn wiki-btn-delete"
+					            onclick="wikiConfirm('정말 삭제하시겠습니까?', '삭제된 위키는 복구할 수 없습니다.', function(){ document.getElementById('deleteForm').submit(); })">
+					        삭제
+					    </button>
+					</div>
                 </div>
                 <hr class="wiki-divider">
 

@@ -2,6 +2,7 @@ package com.weple.cloud.project.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,5 +88,25 @@ public class ProjectServiceImpl implements ProjectService {
     public boolean isModuleActive(Long projectId, String moduleName) {
         return projectMapper.isModuleActive(projectId, moduleName) > 0;
     }
+
+	@Override
+	public Set<String> findProjectPermissionCodes(String userCode, Long projectId) {
+		return new java.util.HashSet<>(projectMapper.selectProjectPermissionCodes(userCode, projectId));
+	}
+
+	@Override
+	public boolean isMember(String userCode, Long projectId) {
+		return projectMapper.isMember(userCode, projectId);
+	}
+
+	@Override
+	public List<ProjectVO> findAllByMember(String userCode, String keyword, int offset, int pageSize) {
+		return projectMapper.selectAllByMember(userCode, keyword, offset, pageSize);
+	}
+
+	@Override
+	public int countAllByMember(String userCode, String keyword) {
+		return projectMapper.countAllByMember(userCode, keyword);
+	}
 
 }

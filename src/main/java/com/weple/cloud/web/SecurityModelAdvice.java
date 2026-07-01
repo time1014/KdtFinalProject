@@ -82,4 +82,15 @@ public class SecurityModelAdvice {
             return Collections.emptyList();
         }
     }
+    
+    @ModelAttribute("isCompanyManager")
+    public boolean isCompanyManager() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof LoginUserDetails)) {
+            return false;
+        }
+        LoginUserVO user = ((LoginUserDetails) authentication.getPrincipal()).getLoginUser();
+        return Integer.valueOf(1).equals(user.getOwnerYn())
+            || Integer.valueOf(1).equals(user.getAdminYn());
+    }
 }

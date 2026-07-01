@@ -145,5 +145,23 @@
         LEFT JOIN roles r ON mr.role_id = r.role_id
         WHERE m.member_id = #{memberId}
     </select>
-
+	
+	<!-- 프로젝트별 권한 코드 조회 -->
+	<select id="selectProjectPermissionCodes" resultType="string">
+	    SELECT DISTINCT rp.permission_code
+	    FROM members m
+	    JOIN member_roles mr ON m.member_id = mr.member_id
+	    JOIN role_permissions rp ON mr.role_id = rp.role_id
+	    WHERE m.user_code = #{userCode}
+	      AND m.project_id = #{projectId}
+	</select>
+	
+	<!-- 멤버십 여부 확인 -->
+	<select id="isMember" resultType="boolean">
+	    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+	    FROM members
+	    WHERE user_code = #{userCode}
+	      AND project_id = #{projectId}
+	</select>
+	
 </mapper>
