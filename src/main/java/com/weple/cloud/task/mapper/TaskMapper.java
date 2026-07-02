@@ -34,6 +34,8 @@ public interface TaskMapper {
 	
 	public List<TaskMilestoneVO> taskMilestones(@Param("pId") long pId);
 	
+	public TaskProjectSelectVO projectPeriod(@Param("pId") long pId);
+	
     public int insertTask(TaskVO taskVO);
     
     public List<TaskVO> selectAllList(Map<String,Object>allParams);

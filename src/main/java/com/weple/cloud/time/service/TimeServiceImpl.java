@@ -36,7 +36,8 @@ public class TimeServiceImpl implements TimeService {
 	@Override
 	public long addProjectTime(WorkTimeVO workTimeVO) {
 		long result = timeMapper.insertProjectTime(workTimeVO);
-		if (result > 0) {
+    long result2 = timeMapper.updateTaskSpentHoursSum(workTimeVO);
+		if (result > 0 && result2 > 0) {
 			// 사용자가 입력한 진척도가 있으면(잠금 상태가 아니었으면) 먼저 이 일감에 직접 반영
 			if (workTimeVO.getProgress() != null) {
 				taskMapper.updateTaskProgress(workTimeVO.getTaskId(), workTimeVO.getProgress());

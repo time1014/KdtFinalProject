@@ -28,6 +28,11 @@ public interface TaskHistoryService {
             String oldProgress,      
             String newProgress,
             String oldParentTask,    
-            String newParentTask
+            String newParentTask,
+            String oldSpentHours,
+            String newSpentHours,
+            String oldFiles,     
+            String newFiles
             );
+	public void insertSubTaskHistory(String parentTaskId, String changedBy, String newSubTaskTitle);
 }

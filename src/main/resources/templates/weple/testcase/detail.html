@@ -4,14 +4,16 @@
 	th:replace="~{common/layouts/default_layout :: layout(~{::section}, ~{::head})}">
 <head>
     <title>WEPLE</title>
-    <link rel="stylesheet" th:href="@{/css/testcase/testcase-detail.css}">
+    <link rel="stylesheet" th:href="@{/css/testcase/testcase-detail.css}" > 
 </head>
 <body>
 
 <section class="my-test-detail">
 
     <div class="breadcrumb">
-        <span>일감</span> : <span th:text="${testCaseDetail.taskTitle}"></span>
+        <span>연결된 일감</span> : <a  id="connectTask"
+        							th:text="${testCaseDetail.taskTitle}"
+                                    th:href="@{/project/task/detail/{id}(id=${taskId}, projectId=${projectId})}"></a>
     </div>
 
     <h2 class="page-title" th:text="${testCaseDetail.testName}">

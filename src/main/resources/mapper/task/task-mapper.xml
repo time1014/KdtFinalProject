@@ -71,6 +71,14 @@
 		FROM milestone
 		WHERE project_id = #{pId} AND milestone_status = 'g1' AND parent_milestone_id IS NOT NULL
 	</select>
+	<select id="projectPeriod" resultType ="TaskProjectSelectVO">
+		SELECT
+			project_id AS projectId, 
+			start_date AS startDate,
+			finish_date AS finishDate
+		FROM project
+		WHERE project_id = #{pId}
+	</select>
 	
 <insert id="insertTask" parameterType="TaskVO">
     <selectKey keyProperty="taskId" resultType="string" order="BEFORE">
@@ -408,7 +416,6 @@ BEGIN
   END IF;
 END;
 /
-
  -->
 
 
@@ -461,6 +468,7 @@ END;
     	JOIN users u
         	ON th.changed_by = u.user_code
 	WHERE th.task_id = #{tId}
+	ORDER BY th.action_at
 </select>
 <!-- 소요시간 목록 조회 -->
 <select id="taskSpentTime">

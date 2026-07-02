@@ -81,6 +81,8 @@
 						</select>
 					</div>
 					<div class="col-md-6">
+					<input type="hidden" id="projectStartDate"
+       th:value="${projectPeriod.startDate}">
 						<label class="form-label">시작일</label> <input type="date"
 							class="form-control" name="startDate" id="startDate">
 					</div>
@@ -88,6 +90,8 @@
 
 				<div class="row" style="margin-bottom: 20px;">
 					<div class="col-md-6">
+					<input type="hidden" id="projectFinishDate"
+       th:value="${projectPeriod.finishDate}">
 						<label class="form-label">완료일</label> <input type="date"
 							class="form-control" name="finishDate" id="finishDate">
 					</div>

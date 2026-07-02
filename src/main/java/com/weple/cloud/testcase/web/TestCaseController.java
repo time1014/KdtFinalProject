@@ -175,11 +175,13 @@ public class TestCaseController {
 	    }
 		
 	    Long companyId = loginUser.getLoginUser().getCompanyId();
+	    
     	
 	    List<TestCaseMemberVO> memberList = testCaseService.findTestCaseMembers(pId);
 	    List<CoverdStatusVO> statusList = testCaseService.findCoverageStatus();
 	    List<TaskParentVO> taskList = testCaseService.findTestCaseTaskList(pId);
 	    List<TestCasePriorityVO> priorityList = testCaseService.findTestCasePriorities(companyId);
+	    memberList.removeIf(member -> member.getUserCode().equals(userCode));
 	    
 	    model.addAttribute("currentMenu", "testcase");
     	model.addAttribute("projectId", pId);
@@ -268,6 +270,7 @@ public class TestCaseController {
     	model.addAttribute("loginUserCode",userCode);
     	model.addAttribute("testCaseDetail",testCaseDetail);
     	model.addAttribute("projectId", projectId);
+    	model.addAttribute("taskId",testCaseDetail.getTaskId());
         model.addAttribute("testId", testId);
         model.addAttribute("currentMenu", "testcase");
         model.addAttribute("project", projectService.findById(String.valueOf(pId)));
@@ -305,6 +308,7 @@ public class TestCaseController {
         List<CoverdStatusVO> statusList = testCaseService.findCoverageStatus();
         List<TaskParentVO> taskList = testCaseService.findTestCaseTaskList(pId);
         List<TestCasePriorityVO> priorityList = testCaseService.findTestCasePriorities(companyId);
+        memberList.removeIf(member -> member.getUserCode().equals(userCode));
         
         // 4. 보내주신 상세조회용 서비스 호출 (조인 쿼리 실행 부)
         // 서비스 메서드 구조에 맞게 (pId, testId) 혹은 (testId) 형태로 호출하세요.
