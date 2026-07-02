@@ -170,10 +170,5 @@
     </set>
     WHERE test_id = #{testId}
 </update>
-<delete id="deleteTestCase">
-    DELETE FROM test_case 
-    WHERE test_id = #{testId} 
-      AND project_id = #{projectId}
-</delete>
 
 </mapper>
