@@ -200,3 +200,19 @@
     white-space: nowrap;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
+#labelOverview .custom-check-box,
+#labelSettings .custom-check-box {
+    background: #9CA3AF !important;
+    border-color: #9CA3AF !important;
+    cursor: not-allowed;
+}
+#labelOverview .module-text,
+#labelSettings .module-text {
+    color: #9CA3AF;
+    cursor: not-allowed;
+}
+#labelOverview,
+#labelSettings {
+    cursor: not-allowed;
+}

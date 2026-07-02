@@ -22,10 +22,11 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
     @Override
-    public List<ProjectMemberVO> searchUsersForAdd(Long projectId, String keyword) {
+    public List<ProjectMemberVO> searchUsersForAdd(Long projectId, String keyword, Long companyId) {
         ProjectMemberSearchVO searchVO = new ProjectMemberSearchVO();
         searchVO.setProjectId(projectId);
         searchVO.setKeyword(keyword);
+        searchVO.setCompanyId(companyId);
         return memberMapper.searchUsersForAdd(searchVO);
     }
 
@@ -52,8 +53,8 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
     }
 
 	@Override
-	public List<ProjectMemberVO> findGroupList() {
-		return memberMapper.selectGroupList();
+	public List<ProjectMemberVO> findGroupList(Long companyId) {
+		return memberMapper.selectGroupList(companyId);
 	}
 
 	@Override

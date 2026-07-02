@@ -500,21 +500,17 @@ public class SystemController {
 	// 프로젝트 생성
 	@GetMapping("/system/project")
 	public String projectCreateForm(@AuthenticationPrincipal LoginUserDetails loginUser, Model model) {
-		
-		Long companyId = loginUser.getLoginUser().getCompanyId();
-		
-		// 관리-설정(systemModules)에서 활성화한 모듈만 표시 (부모 → 자식 전달)
-	    List<SystemModuleVO> moduleList = systemModuleService.findModuleAll();
-	    List<String> enabledCodes = systemModuleService.findEnabledModuleCodes(companyId);
-	    moduleList.removeIf(m -> !enabledCodes.contains(m.getCommonId()));
 
-	    model.addAttribute("moduleList", moduleList);
-	    model.addAttribute("defaultModules", List.of("b1", "b11")); // 개요, 설정 기본 선택
+	    Long companyId = loginUser.getLoginUser().getCompanyId();
+
+	    // 관리-설정(systemModules)에서 활성화한 모듈은 "기본 체크"로만 반영 (숨기지 않고 전체 다 보여줌)
+	    List<String> enabledCodes = systemModuleService.findEnabledModuleCodes(companyId);
+	    model.addAttribute("enabledCodes", enabledCodes);
 
 	    model.addAttribute("sidebarMenu", "system");
 	    model.addAttribute("currentMenu", "systemproject");
 
-		return "weple/system/projectCreate";
+	    return "weple/system/projectCreate";
 	}
 
 	@PostMapping("/system/project")
@@ -567,27 +563,18 @@ public class SystemController {
 	// 프로젝트 수정
 	@GetMapping("/system/project/update/{projectId}")
 	public String projectUpdateForm(
-			@PathVariable String projectId,
-			@AuthenticationPrincipal LoginUserDetails loginUser,
+	        @PathVariable String projectId,
+	        @AuthenticationPrincipal LoginUserDetails loginUser,
 	        Model model){
-				
-				SystemProjectVO project = systemProjectService.selectProjectById(Long.parseLong(projectId));
-				
-				Long companyId = loginUser.getLoginUser().getCompanyId();
-			    List<SystemModuleVO> moduleList = systemModuleService.findModuleAll();
-			    List<String> enabledCodes = systemModuleService.findEnabledModuleCodes(companyId);
-			    moduleList.removeIf(m -> !enabledCodes.contains(m.getCommonId()));
-				
-			    model.addAttribute("moduleList", moduleList);
-			    model.addAttribute("checkedModules", project != null ? project.getModuleNames() : new ArrayList<>());
-			    model.addAttribute("defaultModules", List.of("b1", "b11"));
-			    
-				model.addAttribute("project", project);
-				model.addAttribute("sidebarMenu", "system");
-				model.addAttribute("currentMenu", "systemproject");
-				
-				return "weple/system/projectUpdate";
-			}
+
+	            SystemProjectVO project = systemProjectService.selectProjectById(Long.parseLong(projectId));
+
+	            model.addAttribute("project", project);
+	            model.addAttribute("sidebarMenu", "system");
+	            model.addAttribute("currentMenu", "systemproject");
+
+	            return "weple/system/projectUpdate";
+	        }
 	        
 	@PostMapping("/system/project/update")
 	public String projectUpdateProcess(

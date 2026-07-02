@@ -72,9 +72,11 @@ public class ProjectMemberController {
             return "weple/access-denide";
         }
 
+        Long companyId = loginUser.getLoginUser().getCompanyId();
+
         List<ProjectMemberVO> memberList = memberService.findMemberList(projectId);
         List<ProjectMemberRoleVO> roleList   = memberService.findRoleList();
-        List<ProjectMemberVO> groupList  = memberService.findGroupList();
+        List<ProjectMemberVO> groupList  = memberService.findGroupList(companyId);
 
         model.addAttribute("project", projectService.findById(String.valueOf(projectId)));
         model.addAttribute("moduleNames", projectService.findActiveModuleNames(projectId));
@@ -91,14 +93,21 @@ public class ProjectMemberController {
         return "weple/project/members";
     }
 
-    //  구성원 추가 모달 - 사용자 검색 AJAX
+    //  구성원 추가 모달 - 사용자 검색 AJAX (같은 회사 사용자만, 이미 소속된 사람도 포함해서 표시)
     @GetMapping("/project/settings/members/search")
     @ResponseBody
     public ResponseEntity<List<ProjectMemberVO>> searchUsers(
+    		@AuthenticationPrincipal LoginUserDetails loginUser,
             @RequestParam Long projectId,
             @RequestParam(required = false, defaultValue = "") String keyword) {
 
-        List<ProjectMemberVO> result = memberService.searchUsersForAdd(projectId, keyword);
+        Set<String> perms = findMemberPermissions(loginUser, projectId);
+        if (!hasPerm(perms, PERM_MEMBER)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Long companyId = loginUser.getLoginUser().getCompanyId();
+        List<ProjectMemberVO> result = memberService.searchUsersForAdd(projectId, keyword, companyId);
         return ResponseEntity.ok(result);
     }
 
@@ -106,8 +115,15 @@ public class ProjectMemberController {
     @GetMapping("/project/settings/members/group")
     @ResponseBody
     public ResponseEntity<List<ProjectMemberVO>> getUsersByGroup(
+    		@AuthenticationPrincipal LoginUserDetails loginUser,
             @RequestParam Long groupId,
             @RequestParam Long projectId) {
+
+        Set<String> perms = findMemberPermissions(loginUser, projectId);
+        if (!hasPerm(perms, PERM_MEMBER)) {
+            return ResponseEntity.status(403).build();
+        }
+
         return ResponseEntity.ok(memberService.findUsersByGroupId(groupId, projectId));
     }
 

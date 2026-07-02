@@ -317,7 +317,7 @@
             var wrap = document.getElementById(wrapId);
             if (!list || !list.length) { wrap.innerHTML = '<p class="modal-empty">검색 결과가 없습니다.</p>'; return; }
             wrap.innerHTML = list.map(function(u) {
-                var img = showAvatar ? '<img src="' + (u.profileImage||'/images/hamster.jpg') + '" class="chip-avatar" onerror="this.src=\'/images/hamster.jpg\'">' : '';
+                var img = showAvatar ? '<img src="' + (u.profileImage||'/images/default-profile.svg') + '" class="chip-avatar" onerror="this.src=\'/images/default-profile.svg\'">' : '';
                 var already = u.isAlreadyMember === true || u.isAlreadyMember === 1;
                 var checkedAttr = already ? 'checked disabled' : '';
                 var extraClass  = already ? ' chip-already' : '';

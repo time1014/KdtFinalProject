@@ -7,9 +7,9 @@ public interface ProjectMemberService {
 
 	public List<ProjectMemberVO> findMemberList(Long projectId);
 
-	public List<ProjectMemberVO> searchUsersForAdd(Long projectId, String keyword);
+	public List<ProjectMemberVO> searchUsersForAdd(Long projectId, String keyword, Long companyId);
 	
-	public List<ProjectMemberVO> findGroupList();
+	public List<ProjectMemberVO> findGroupList(Long companyId);
 	 
 	public List<ProjectMemberVO> findUsersByGroupId(Long groupId, Long projectId);
 

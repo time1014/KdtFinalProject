@@ -32,9 +32,9 @@
             <a th:href="@{/approvalList}" 
                th:class="${menu == 'approval'} ? 'active' : ''">가입승인</a>
         </li>
-        <li>
+        <li th:if="${isCompanyOwner}">
 		    <a th:href="@{/system/systemModules}" 
-			   th:class="${menu == 'setting'} ? 'active' : ''">설정</a>
+		       th:class="${menu == 'setting'} ? 'active' : ''">설정</a>
 		</li>
         
 

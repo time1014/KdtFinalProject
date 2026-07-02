@@ -1,6 +1,7 @@
 package com.weple.cloud.project.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -68,18 +69,25 @@ public class ProjectServiceImpl implements ProjectService {
     public void saveProjectSetting(ProjectVO vo) {
         // 기본 정보 수정(제목, 설명)
         projectMapper.updateProjectSetting(vo);
- 
-        //    관리 모듈 전체 목록을 기준으로 is_active만 업데이트
+
         List<String> checkedModules = vo.getModuleNames();
         if (checkedModules == null) checkedModules = new ArrayList<>();
- 
-        // 관리에서 선택된 전체 모듈 목록 조회
-        List<String> allModules = projectMapper.selectModuleNames(vo.getProjectId());
- 
-        for (String moduleName : allModules) {
-            // 체크된 모듈은 Y, 해제된 모듈은 N
+
+        // 이미 module_mapping에 등록되어 있는 모듈(관리-프로젝트에서 선택했던 이력)
+        List<String> existingModules = projectMapper.selectModuleNames(vo.getProjectId());
+        Set<String> existingSet = new HashSet<>(existingModules);
+
+        // 기존에 있던 모듈은 is_active만 갱신
+        for (String moduleName : existingModules) {
             String isActive = checkedModules.contains(moduleName) ? "Y" : "N";
             projectMapper.updateModuleActive(vo.getProjectId(), moduleName, isActive);
+        }
+
+        // 이번에 새로 체크됐지만 아직 module_mapping에 없던 모듈은 새로 등록 (is_active는 기본값 Y로 들어감)
+        for (String moduleName : checkedModules) {
+            if (!existingSet.contains(moduleName)) {
+                projectMapper.insertModuleMapping(vo.getProjectId(), moduleName);
+            }
         }
     }
 	

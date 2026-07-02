@@ -340,17 +340,20 @@ span.flatpickr-weekday { font-size: 11px; font-weight: 700; color: #94A3B8; }
 }
 
 /* 설정 모듈 고정 체크 - 회색 처리 */
-#labelSettings .custom-check-box {
+#labelSettings .custom-check-box,
+#labelOverview .custom-check-box {
     background: #9CA3AF !important;
     border-color: #9CA3AF !important;
     cursor: not-allowed;
 }
 
-#labelSettings .module-text {
+#labelSettings .module-text,
+#labelOverview .module-text {
     color: #9CA3AF;
     cursor: not-allowed;
 }
 
-#labelSettings {
+#labelSettings,
+#labelOverview {
     cursor: not-allowed;
 }

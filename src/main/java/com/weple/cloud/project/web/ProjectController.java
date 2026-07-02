@@ -122,46 +122,29 @@ public class ProjectController {
     		@AuthenticationPrincipal LoginUserDetails loginUser,
     		@PathVariable Long projectId,
     		Model model) {
-    	
-    	try {
-            if (!isCompanyManager(loginUser.getLoginUser())
-                    && !projectService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
-                return "weple/access-denide";
-            }
-        } catch (Exception e) {
-            return "weple/access-denide";
-        }
-    	
-    	// 멤버도 관리자도 아니면 차단
-        if (!isCompanyManager(loginUser.getLoginUser())
-                && !projectService.isMember(loginUser.getLoginUser().getUserCode(), projectId)) {
-            return "weple/access-denide";
-        }
+
         Set<String> perms = findProjectPermissions(loginUser, projectId);
 
-        // 관리에서 선택된 모듈 전체 목록 (체크박스 표시 기준, is_active 무관)
-        List<String> adminModules = projectService.findModuleNames(projectId);
-        Set<String> adminSet = new HashSet<>(adminModules);
+        // 모듈 설정 권한(k1_select)이 없으면 페이지 자체를 보여주지 않음 (멤버십만으로는 부족 - 사용자는 프로젝트-설정이 보이면 안 됨)
+        if (!hasPerm(perms, PERM_SELECT)) {
+            return "weple/access-denide";
+        }
 
-        // 현재 is_active = 'Y'인 모듈 (체크 여부 기준)
+        // 현재 is_active = 'Y'인 모듈 (체크 여부 기준. 프로젝트 생성 시 관리-프로젝트에서 선택한 값이
+        // 최초에는 그대로 is_active='Y'로 들어가 있으므로, 이 값이 곧 "관리-프로젝트 생성 때 선택한 항목")
         List<String> activeModules = projectService.findActiveModuleNames(projectId);
         Set<String> activeSet = new HashSet<>(activeModules);
 
-        // 관리에서 선택된 모듈만 표시, b11(설정)은 숨김
+        // 전체 모듈을 다 표시. b1(개요)/b11(설정)은 항상 강제 포함이므로 화면에서 숨김
         List<Map<String, Object>> modules = new ArrayList<>();
         for (Map<String, String> m : ALL_MODULES) {
             String name = m.get("name");
 
-            // b11(설정)은 항상 강제 포함이므로 화면에서 숨김
-            if ("b11".equals(name)) continue;
-
-            // 관리에서 선택된 모듈만 체크박스로 표시
-            if (!adminSet.contains(name)) continue;
+            if ("b1".equals(name) || "b11".equals(name)) continue;
 
             Map<String, Object> item = new HashMap<>();
             item.put("name",    name);
             item.put("label",   m.get("label"));
-            // is_active = 'Y'인 것만 체크 표시
             item.put("checked", activeSet.contains(name));
             modules.add(item);
         }
@@ -193,13 +176,14 @@ public class ProjectController {
         if (!hasPerm(perms, PERM_SELECT)) return "weple/access-denide";
         
         vo.setProjectId(projectId);
-        // b11(설정)은 항상 강제 포함
+        // b1(개요), b11(설정)은 항상 강제 포함
         List<String> modules = vo.getModuleNames();
         if (modules == null) modules = new ArrayList<>();
+        if (!modules.contains("b1"))  modules.add("b1");
         if (!modules.contains("b11")) modules.add("b11");
         vo.setModuleNames(modules);
 
-        // saveProjectSetting 내부에서 delete+insert 대신 is_active 업데이트
+        // saveProjectSetting 내부에서 module_mapping에 없던 모듈은 새로 등록, 있던 모듈은 is_active만 갱신
         projectService.saveProjectSetting(vo);
 
         ra.addFlashAttribute("toastMessage", "설정이 저장되었습니다.");
