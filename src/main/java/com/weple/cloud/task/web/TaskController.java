@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -28,6 +29,7 @@ import org.springframework.web.util.UriUtils;
 
 import com.weple.cloud.auth.service.LoginUserDetails;
 import com.weple.cloud.file.FileDownloadDTO;
+import com.weple.cloud.file.TaskFileVO;
 import com.weple.cloud.history.task.service.TaskHistoryService;
 import com.weple.cloud.notification.service.AlarmType;
 import com.weple.cloud.notification.service.NotificationService;
@@ -225,6 +227,14 @@ public class TaskController {
 
 	    taskService.insertTask(taskVO, files);
 	    TaskVO createdTask = taskService.findTaskDetail(taskVO.getTaskId());
+	    
+	    String newFiles = "";
+	    if (createdTask.getFileList() != null && !createdTask.getFileList().isEmpty()) {
+	        newFiles = createdTask.getFileList().stream()
+	                .map(TaskFileVO::getLogicalName) // TaskFileVO에서 localName만 추출
+	                .collect(Collectors.joining(", ")); // 콤마로 연결 (예: "파일1.txt, 파일2.png")
+	    }
+
 	    // 작업내역 등록 - 은지
 	    taskHistoryService.insertHistory(
 	    		createdTask.getTaskId(), userCode, "CREATE",
@@ -238,8 +248,17 @@ public class TaskController {
 	    	    null, toStr(createdTask.getFinishDate()),
 	    	    null, toStr(createdTask.getEstimatedTime()),
 	    	    null, toStr(createdTask.getTaskProgress()),
-	    	    null, createdTask.getParentTaskTitle()
+	    	    null, createdTask.getParentTaskTitle(),
+	    	    null ,toStr(createdTask.getSpentHoursSum()),
+	    	    null, newFiles
 	    	);
+	    if (createdTask.getParentTaskId() != null && !createdTask.getParentTaskId().trim().isEmpty()) {
+            taskHistoryService.insertSubTaskHistory(
+                createdTask.getParentTaskId(), 
+                userCode,                     
+                createdTask.getTaskTitle()     
+            );
+        }
 	    
 	    return "redirect:/project/task/detail/" + taskVO.getTaskId() + "?projectId=" + pId;
 	}
@@ -274,11 +293,8 @@ public class TaskController {
 		List<TaskVO> childTaskList = taskService.findChildTask(tId);
 		List<TaskHistoryDTO> updateHistoryList = taskService.taskUpdateHistory(tId);
 		List<TaskSpentTimeVO> spentTimeList = taskService.taskSpentTime(tId);
-		Long spentSum = spentTimeList.stream()
-		        .mapToLong(TaskSpentTimeVO::getSpentHour)
-		        .sum();
-		
-		System.out.println("항목 변경 이력 :" + updateHistoryList);
+
+		System.out.println("여기 :" + taskDetail);
 		
 		model.addAttribute("currentUserCode", userCode);
 		model.addAttribute("currentMenu", "task");
@@ -289,7 +305,6 @@ public class TaskController {
 		model.addAttribute("taskComment", taskComment);
 		model.addAttribute("updateHistoryList", updateHistoryList);
 		model.addAttribute("spentTimeList", spentTimeList);
-		model.addAttribute("spentSum", spentSum);
 		model.addAttribute("taskPerms",taskPerms);
 		model.addAttribute("isAdminOrOwner",isAdminOrOwner);
 		model.addAttribute("sidebarMenu", "project");
@@ -523,8 +538,9 @@ public class TaskController {
 	            }
 	        }
 	    }
+	    TaskProjectSelectVO projectPeriod = taskService.findprojectPeriod(pId);
 	    memberList.removeIf(member -> member.getUserCode().equals(userCode));
-
+	    model.addAttribute("projectPeriod" , projectPeriod);
 	    model.addAttribute("currentMenu", "task");
 	    model.addAttribute("projectId", pId);
 	    model.addAttribute("taskDetail", taskDetail);
@@ -556,13 +572,26 @@ public class TaskController {
 
 	    // 수정 전 값 먼저 조회-은지
 	    TaskVO before = taskService.findTaskDetail(taskVO.getTaskId());
-	    String oldTitle = before.getTaskTitle();
-	    String oldTypeName = before.getTypeIdName();
+
+	    
+	    String oldFiles = "";
+	    if (before.getFileList() != null && !before.getFileList().isEmpty()) {
+	        oldFiles = before.getFileList().stream()
+	                .map(TaskFileVO::getLogicalName)
+	                .collect(Collectors.joining(", "));
+	    }
 	    
 	    // 수정 처리 서비스 호출 (VO 내부에 taskId가 hidden으로 담겨서 넘어옵니다)
 	    taskService.updateTask(taskVO, files, deletedFileIds);
 	    
 	    TaskVO after = taskService.findTaskDetail(taskVO.getTaskId());
+	    
+	    String newFiles = "";
+	    if (after.getFileList() != null && !after.getFileList().isEmpty()) {
+	        newFiles = after.getFileList().stream()
+	                .map(TaskFileVO::getLogicalName)
+	                .collect(Collectors.joining(", "));
+	    }
 	    
 	    // 알림-은지(상태 변경)
 	    boolean statusChanged = before.getTaskStatusId() != null
@@ -607,7 +636,9 @@ public class TaskController {
 	          toStr(before.getFinishDate()),      toStr(after.getFinishDate()),
 	          toStr(before.getEstimatedTime()),   toStr(after.getEstimatedTime()),
 	          toStr(before.getTaskProgress()),    toStr(after.getTaskProgress()),
-	          before.getParentTaskTitle(),        after.getParentTaskTitle()
+	          before.getParentTaskTitle(),        after.getParentTaskTitle(),
+	          toStr(before.getSpentHoursSum()), toStr(after.getSpentHoursSum()),
+	          oldFiles,                           newFiles
 	    	);
 	    
 	    // 수정 완료 후 해당 일감의 상세조회 페이지로 리다이렉트
@@ -630,6 +661,12 @@ public class TaskController {
 	    System.out.println("aaa:" + before);
 	    String oldTitle = before.getTaskTitle();
 	    String oldTypeName = before.getTypeIdName();
+	    String oldFiles = "";
+	    if (before.getFileList() != null && !before.getFileList().isEmpty()) {
+	        oldFiles = before.getFileList().stream()
+	                .map(TaskFileVO::getLogicalName)
+	                .collect(Collectors.joining(", "));
+	    }
 	    
 	    // 소프트 딜리트 실행 (기존 공통 로직)
 	    taskService.deleteTask(tId);
@@ -647,7 +684,10 @@ public class TaskController {
             toStr(before.getFinishDate()),      null,
             toStr(before.getEstimatedTime()),   null,
             toStr(before.getTaskProgress()),    null,
-            before.getParentTaskId(),           null
+            before.getParentTaskId(),           null,
+            toStr(before.getSpentHoursSum()),    null,
+            oldFiles,                           null
+            
 	    );
 	    
 	    // 해당 프로젝트의 일감 목록 페이지로 리다이렉트

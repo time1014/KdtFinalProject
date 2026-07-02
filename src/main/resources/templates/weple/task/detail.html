@@ -55,29 +55,29 @@
 					<div class="info-column">
 						<div class="info-row">
 							<span class="label">상태:</span> <span class="value bold"
-								th:text="*{taskStatus}">신규</span>
+								th:text="*{taskStatus}"></span>
 						</div>
 						<div class="info-row">
 							<span class="label">우선순위:</span> <span
-								class="value priority-badge" th:text="*{priority}">매우낮음</span>
+								class="value priority-badge" th:text="*{priority}"></span>
 						</div>
 						<div class="info-row">
 							<span class="label">담당자:</span> <span class="value link-color"
-								th:text="*{taskManager}">Redmine Admin</span>
+								th:text="*{taskManager}"></span>
 						</div>
 						<div class="info-row">
 							<span class="label">소요시간:</span> <span class="value link-color"
-								th:text="|${spentSum} 시간|"></span>
+								th:text="|*{spentHoursSum} 시간|"></span>
 						</div>
 					</div>
 					<div class="info-column">
 						<div class="info-row">
 							<span class="label">시작일:</span> <span class="value"
-								th:text="*{startDate}">2026/06/11</span>
+								th:text="*{startDate}"></span>
 						</div>
 						<div class="info-row">
 							<span class="label">완료일:</span> <span class="value danger-color"
-								th:text="*{finishDate}">2026/06/12</span>
+								th:text="*{finishDate}"></span>
 						</div>
 
 						<div class="info-row align-center">
@@ -87,13 +87,13 @@
 									<div class="progress-bar-fill"
 										th:style="|width: *{taskProgress ?: 0}%|"></div>
 								</div>
-								<span class="progress-percent" th:text="|*{taskProgress ?: 0}%|">60%</span>
+								<span class="progress-percent" th:text="|*{taskProgress ?: 0}%|"></span>
 							</div>
 						</div>
 						<div class="info-row">
 							<span class="label">추정시간:</span> <span
 								class="value link-color bold"
-								th:text="|*{estimatedTime ?: 0} 시간|">4:00 시간</span>
+								th:text="|*{estimatedTime ?: 0} 시간|"></span>
 						</div>
 					</div>
 				</div>
@@ -127,9 +127,7 @@
 
 				<div class="task-section subtasks-area">
 					<div class="section-title">
-						<span>하위 일감</span> <a
-							th:href="@{/project/task/insert(projectId=${projectId})}"
-							class="btn-add">추가</a>
+						<span>하위 일감</span>
 					</div>
 
 					<div class="section-content">
@@ -208,7 +206,7 @@
                 detail.fieldName == 'milestone_id' ? '마일스톤' :
                 detail.fieldName == 'type_name' ? '일감유형' :
                 detail.fieldName
-            }"></strong>을(를)
+            }"></strong>을
             
             <th:block th:if="${history.actionType == 'UPDATE'}">
                 <span th:text="${detail.oldValue}"></span>에서 
@@ -218,6 +216,10 @@
             <th:block th:if="${history.actionType == 'CREATE'}">
                 <strong th:text="${detail.newValue}"></strong>(으)로 설정하여 생성했습니다.
             </th:block>
+            <!-- 하위일감 추가 관련 -->
+            <th:block th:if="${history.actionType == 'ADD_SUBTASK'}">
+            <strong th:text="${detail.newValue}"></strong> 이(가) 등록 되었습니다.
+        </th:block>
 
         </div>
     </div>
@@ -350,7 +352,7 @@
 								<tr>
 									<th>날짜</th>
 									<th>사용자</th>
-									<th>활동</th>
+									<th>내용</th>
 									<th>시간</th>
 								</tr>
 							</thead>

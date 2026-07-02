@@ -16,6 +16,8 @@ public interface TimeMapper {
 
 	// 등록
 	public long insertProjectTime(WorkTimeVO workTimeVO);
+	
+	public long updateTaskSpentHoursSum(WorkTimeVO workTimeVO);
 
 	// 수정
 	public long updateProjectTime(WorkTimeVO workTimeVO);

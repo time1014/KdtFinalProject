@@ -36,8 +36,9 @@ public class TimeServiceImpl implements TimeService {
 	@Override
 	public long addProjectTime(WorkTimeVO workTimeVO) {
 		long result = timeMapper.insertProjectTime(workTimeVO);
+		long result2 = timeMapper.updateTaskSpentHoursSum(workTimeVO);
 		// 프로시저 실행
-		if (result > 0) {
+		if (result > 0 && result2 > 0) {
 			taskMapper.updateHierarchicalProgress(workTimeVO.getTaskId());
 	    }
 		return result == 1 ? workTimeVO.getWorkId() : -1;

@@ -39,7 +39,11 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
             String oldProgress,      
             String newProgress,
             String oldParentTask,    
-            String newParentTask
+            String newParentTask,
+            String oldSpentHours,
+            String newSpentHours,
+            String oldFiles,   
+            String newFiles
 			) {
 		
 		// task_history 1건 생성
@@ -61,6 +65,8 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 	    appendIfChanged(oldSummary, newSummary, "추정시간", oldEstimatedTime, newEstimatedTime);
 	    appendIfChanged(oldSummary, newSummary, "진척도",   oldProgress,      newProgress);
 	    appendIfChanged(oldSummary, newSummary, "상위일감", oldParentTask,    newParentTask);
+	    appendIfChanged(oldSummary, newSummary, "소요시간", oldSpentHours, newSpentHours);
+	    appendIfChanged(oldSummary, newSummary, "첨부파일", oldFiles, newFiles);
 
 	    // 변경사항이 있을 때만 detail 1건 저장
 	    if (oldSummary.length() > 0 || newSummary.length() > 0) {
@@ -85,6 +91,29 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 	        );
 	    }
 	}
+	@Override
+	public void insertSubTaskHistory(String parentTaskId, String changedBy, String newSubTaskTitle) {
+	    // 1. 상위 일감(parentTaskId)을 대상으로 task_history 1건 생성
+	    // actionType을 "ADD_SUBTASK" 등으로 지정하여 구분하기 쉽게 만듭니다.
+	    taskHistoryMapper.insertTaskHistory(parentTaskId, changedBy, "ADD_SUBTASK");
+	    Long historyId = taskHistoryMapper.selectLastHistoryId();
+
+	    // 2. task_history_detail 생성 (하위 일감 제목을 요약에 포함)
+	    String newValue = "하위 일감: " + newSubTaskTitle;
+	    
+	    // 오라클 VARCHAR2(255) 글자 수 제한 방어 로직
+	    if (newValue.length() > 250) {
+	        newValue = newValue.substring(0, 247) + "...";
+	    }
+
+	    // oldValue는 비워두고, newValue에 추가된 하위 일감의 제목을 넣습니다.
+	    taskHistoryMapper.insertTaskHistoryDetail(
+	        historyId,
+	        "summary", // 기존처럼 summary로 통일하거나 "sub_task"로 분리 가능
+	        "",        // 이전 값은 없으므로 빈 문자열
+	        newValue   // 하위일감 제목
+	    );
+	}
 	
 	
 
@@ -100,6 +129,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 	        newSb.append(label).append(":").append(n);
 	    }
 }
+
 	
 	
 }
