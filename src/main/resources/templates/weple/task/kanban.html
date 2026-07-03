@@ -7,8 +7,6 @@
     <meta charset="UTF-8">
     <title>칸반보드</title>
     <link rel="stylesheet" href="/css/task/task-kanban.css">
-    <link rel="stylesheet"
-		  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 
 <body>
@@ -43,13 +41,19 @@
 		         ondragleave="kanbanDragLeave(event)">
 		
 		        <div th:each="task : ${tasksByStatus.get(status.commonId)}"
-				     class="kanban-card"
-				     th:attr="data-task-id=${task.taskId}"
-				     th:draggable="${isAdminOrOwner
+				     th:with="canEditThis=${isAdminOrOwner
 				                     or (taskPerms != null and taskPerms.k3Edit == 'k3_edit')
 				                     or (taskPerms != null and taskPerms.k3Myedit == 'k3_myedit' and task.taskManagerId == loginUserCode)}"
+				     class="kanban-card"
+				     th:classappend="${canEditThis} ? 'kanban-card-editable' : 'kanban-card-readonly'"
+				     th:attr="data-task-id=${task.taskId}"
+				     th:draggable="${canEditThis}"
 				     ondragstart="kanbanDragStart(event)"
 				     ondragend="kanbanDragEnd(event)">
+				
+				    <span th:if="${canEditThis}" class="kanban-edit-badge" title="수정 가능">
+				        <i class="fa fa-pencil"></i>
+				    </span>
 				
 				    <div class="kanban-card-top">
 					    <span class="kanban-type-badge"
@@ -74,7 +78,7 @@
 						        'kanban-priority priority-low' :
 						        'kanban-priority priority-normal')))"
 						>
-						    <i class="fa-solid fa-signal priority-icon"></i>
+						    <i class="fa fa-signal priority-icon"></i>
 						    <span th:text="${task.priority}"></span>
 						</span>
 					</div>
@@ -97,9 +101,13 @@
 					    </span>
 					
 					    <span class="kanban-card-due"
-					          th:if="${task.finishDate != null}"
-					          th:text="${#temporals.format(task.finishDate,'MM.dd')}">
-					    </span>
+						      th:if="${task.finishDate != null}"
+						      th:text="${#temporals.format(task.finishDate,'MM.dd')}">
+						</span>
+						<span class="kanban-card-due kanban-card-due-empty"
+						      th:unless="${task.finishDate != null}">
+						    마감일 없음
+						</span>
 					</div>
 		        </div>
 		

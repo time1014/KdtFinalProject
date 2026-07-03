@@ -105,4 +105,11 @@ public class TaskKanbanServiceImpl implements TaskKanbanService {
 
         return result;
     }
+    private String findStatusText(List<TaskStatusVO> statusList, String commonId) {
+        if (commonId == null) return null;
+        for (TaskStatusVO s : statusList) {
+            if (commonId.equals(s.getCommonId())) return s.getDefaultDescribe();
+        }
+        return commonId;
+    }
 }
