@@ -10,9 +10,13 @@ public interface DashboardService {
 
 	List<TaskVO> getTasksDueWithinAWeek(String userCode);
 
-	List<DashboardProjectDTO> getProjectsByMember(String userCode);
-
+	List<DashboardProjectDTO> getProjectsForDashboard(String userCode, boolean isManager);
+	
 	List<WorkLogVO> getRecentActivities(String userCode, String projectId);
+
+	
+
+	
 
 
 }
