@@ -352,7 +352,7 @@ public class SystemController {
 		}
 		model.addAttribute("codeList", codeList);
 		model.addAttribute("codeList", codeList);
-		model.addAttribute("menu", "code");
+		model.addAttribute("menu", "codeValue");
 		model.addAttribute("sidebarMenu", "system");
 
 		return "weple/admin/code/list";
@@ -366,7 +366,7 @@ public class SystemController {
 		String pageTitle = "work".equals(type) ? "작업분류" : "일감 우선순위";
 	    model.addAttribute("pageTitle", pageTitle);
 		model.addAttribute("type", type);
-		model.addAttribute("menu", "code");
+		model.addAttribute("menu", "codeValue");
 		model.addAttribute("sidebarMenu", "system");
 		// 현재 기본값 이름 (등록 폼에서 기본값 설정 시 confirm 메시지에 표시)
 		String defaultName = codeValueService.findDefaultNameByType(type, null);
@@ -413,7 +413,7 @@ public class SystemController {
 	    model.addAttribute("pageTitle", pageTitle);
 	    model.addAttribute("CodeValue", result);
 		model.addAttribute("type", type);
-		model.addAttribute("menu", "code");
+		model.addAttribute("menu", "codeValue");
 		model.addAttribute("sidebarMenu", "system");
 		return "weple/admin/code/codeForm";
 	}
@@ -702,7 +702,7 @@ public class SystemController {
 	
 	
 	// -------------------------------역할 및 권한------------------------------
-	@Autowired
+    @Autowired
 	private RoleService roleService;
 	
 	// 역할 목록
@@ -783,6 +783,13 @@ public class SystemController {
 	                          @AuthenticationPrincipal LoginUserDetails loginUser,
 	                          RedirectAttributes redirectAttributes) {
 	    Long companyId = loginUser.getLoginUser().getCompanyId();
+
+	    // 구성원에게 할당되어 사용 중인 역할은 삭제 불가
+	    if (roleService.isRoleInUse(roleId)) {
+	        redirectAttributes.addFlashAttribute("toastMessage", "해당 역할을 사용 중인 구성원이 있어 삭제할 수 없습니다.");
+	        return "redirect:/system/role";
+	    }
+
 	    int result = roleService.deleteRole(roleId, companyId);
 	    if(result > 0) {
 	        redirectAttributes.addFlashAttribute("toastMessage", "역할이 삭제되었습니다.");
@@ -790,7 +797,6 @@ public class SystemController {
 	    return "redirect:/system/role";
 	}
 	
-	// private 헬퍼: permissionList → tagLabel 기준 LinkedHashMap
 	private java.util.LinkedHashMap<String, java.util.List<PermissionVO>> groupPermissions(
 	        java.util.List<PermissionVO> permissionList) {
 
@@ -798,7 +804,6 @@ public class SystemController {
 	            new java.util.LinkedHashMap<>();
 
 	    for (PermissionVO perm : permissionList) {
-	        // tagLabel(한글)이 없으면 permissionTag(k1~k7) 로 폴백
 	        String key = (perm.getTagLabel() != null && !perm.getTagLabel().isBlank())
 	                     ? perm.getTagLabel()
 	                     : perm.getPermissionTag();
