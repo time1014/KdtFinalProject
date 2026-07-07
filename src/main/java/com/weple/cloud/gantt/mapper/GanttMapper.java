@@ -12,4 +12,10 @@ public interface GanttMapper {
 	
 	// 집계 없는 마일스톤 조회
     List<MilestoneInfoVO> selectMilestoneForGantt(@Param("projectId") Long projectId);
+    
+ // [추가] 프로젝트별 특정 모듈 활성화 카운트 조회
+    int isModuleActive(@Param("projectId") Long projectId, @Param("moduleName") String moduleName);
+    
+ // 프로젝트 접근 권한여부
+ 	int checkProjectMembership(@Param("projectId") Long projectId, @Param("userCode") String userCode);
 }

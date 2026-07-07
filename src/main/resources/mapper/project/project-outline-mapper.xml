@@ -40,8 +40,23 @@
     FROM task t
     LEFT JOIN task_types tp ON t.type_id = tp.type_id
     LEFT JOIN users u ON t.task_manager = u.user_code
-    WHERE t.project_id = #{projectId}
+    WHERE t.project_id = #{projectId} AND t.deleted_yn = 'N'
 </select>
+
+<select id="isModuleActive" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM module_mapping
+        WHERE project_id = #{projectId}
+          AND module_name = #{moduleName}
+          AND is_active = 'Y'
+    </select>
+    
+    <select id="checkProjectMembership" parameterType="map" resultType="int">
+	    SELECT COUNT(*)
+	    FROM members
+	    WHERE PROJECT_ID = #{projectId}
+	      AND USER_CODE = #{userCode}
+	</select>
 
 
 

@@ -519,9 +519,9 @@
 					<div class="trm-field">
 						<label>진척도</label>
 						<div class="trm-progress-wrap">
-							<input type="range" id="trmProgressRange" name="progress" min="0"
-								max="100" th:value="${taskDetail.taskProgress ?: 0}"> <span
-								id="trmProgressText" class="trm-progress-text"
+							<input type="range" id="trmProgressRange" name="progress" min="0" max="100" step="10"
+								th:value="${taskDetail.taskProgress ?: 0}">
+							<span id="trmProgressText" class="trm-progress-text"
 								th:text="|${taskDetail.taskProgress ?: 0}%|">0%</span>
 						</div>
 					</div>

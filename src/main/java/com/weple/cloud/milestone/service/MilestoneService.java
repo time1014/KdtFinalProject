@@ -68,8 +68,8 @@ public interface MilestoneService {
 	void modifyMilestoneTasks(MilestoneVO milestoneVO, List<String> taskIds);
 
 	
-
-	
+	// 프로젝트 멤버 여부
+	boolean checkProjectMembership(Long projectId, String userCode);
 
 	
 	

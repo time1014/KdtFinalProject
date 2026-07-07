@@ -327,7 +327,42 @@ public class TimeController {
 			return "weple/access-denide";
 		}
 
-		timeService.modifyProjectTime(workTimeVO);
+		String taskId = workTimeVO.getTaskId();
+		TaskVO before = (taskId != null) ? taskService.findTaskDetail(taskId) : null;
+		long oldSpentHours = (before != null) ? before.getSpentHoursSum() : 0;
+
+		try {
+			timeService.modifyProjectTime(workTimeVO);
+			TaskVO after = (taskId != null) ? taskService.findTaskDetail(taskId) : null;
+			long newSpentHours = (after != null) ? after.getSpentHoursSum() : 0;
+			if (taskId != null && oldSpentHours != newSpentHours) {
+				taskHistoryService.insertHistory(
+					taskId,
+					loginUser.getLoginUser().getUserCode(),
+					"UPDATE",
+					null, null,
+					null, null,
+					null, null,
+					null, null,
+					null, null,
+					null, null,
+					null, null,
+					null, null,
+					null, null,
+					null, null,
+					null, null,
+					String.valueOf(oldSpentHours),
+					String.valueOf(newSpentHours),
+					null, null  // 파일 이력
+				);
+			}
+		} catch (IllegalStateException ex) {
+			ra.addFlashAttribute("toastType", "error");
+			ra.addFlashAttribute("toastMessage", ex.getMessage());
+			return "redirect:/updateProjectTime?workId=" + workTimeVO.getWorkId()
+					+ "&projectId=" + workTimeVO.getProjectId();
+		}
+
 		ra.addFlashAttribute("toastMessage", "소요시간이 수정되었습니다.");
 
 		// ✅ 수정 성공: projectId 있으면 프로젝트 내 소요시간 목록, 없으면 전체 소요시간 목록

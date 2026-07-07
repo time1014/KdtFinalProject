@@ -4,7 +4,7 @@
 	<select id="selectTaskAll" resultType="TaskVO">
 		SELECT * 
 		FROM task 
-		WHERE project_id = #{projectId}
+		WHERE project_id = #{projectId} AND deleted_yn = 'N'
 	</select>
 	
 	
@@ -68,5 +68,20 @@
           AND m.parent_milestone_id IS NULL
         ORDER BY m.created_at DESC, c.created_at ASC
     </select>
+    
+    <select id="isModuleActive" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM module_mapping
+        WHERE project_id = #{projectId}
+          AND module_name = #{moduleName}
+          AND is_active = 'Y'
+    </select>
+    
+    <select id="checkProjectMembership" parameterType="map" resultType="int">
+	    SELECT COUNT(*)
+	    FROM members
+	    WHERE PROJECT_ID = #{projectId}
+	      AND USER_CODE = #{userCode}
+	</select>
 	
 </mapper>

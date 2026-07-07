@@ -82,11 +82,11 @@
 						<label>진척도</label>
 						<div class="progress-wrap">
 							<input type="range" id="progressRange" name="progress" min="0"
-								max="100" value="0"> <span id="progressText"
+								max="100" step="10" value="0"> <span id="progressText"
 								class="progress-text">0%</span>
 						</div>
 					</div>
-					<p class="progress-hint" id="progressHint" style="display: none;">* 하위일감이 있는 일감은 현재 진척도보다 낮게는 등록할 수 없습니다.</p>
+					<p class="progress-hint" id="progressHint" style="display: none;">* 완료되지 않은 하위일감이 있는 일감은 진척도를 수정할 수 없습니다.</p>
 
 					<!-- 내용 -->
 					<div class="modal-field modal-field-textarea">
@@ -479,12 +479,11 @@ function applyProgressLock(taskId, currentProgress) {
         hint.textContent = '* 완료되지 않은 하위일감이 있어 진척도를 수정할 수 없습니다.';
         hint.style.display = 'block';
       } else {
-        // 하위일감이 없으면 편집 가능, 단 현재값보다 낮게는 불가
+        // 하위일감이 없으면 0~100% 범위에서 자유롭게 편집 가능 (현재값보다 낮게도 설정 가능)
         rangeEl.disabled = false;
         rangeEl.classList.remove('progress-locked');
-        rangeEl.min = currentProgress;
-        hint.textContent = '* 진척도는 현재보다 낮게 설정할 수 없습니다.';
-        hint.style.display = 'block';
+        rangeEl.min = 0;
+        hint.style.display = 'none';
       }
       updateRangeFill(rangeEl);
     })

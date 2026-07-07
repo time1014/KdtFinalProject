@@ -102,4 +102,7 @@ public interface MilestoneMapper {
 	// 진척도에 따라 마일스톤 상태 자동 업데이트
 	public void updateMilestoneStatusByTaskProgress(@Param("milestoneId") Long milestoneId);
 	
+	// 프로젝트 접근 권한여부
+	int checkProjectMembership(@Param("projectId") Long projectId, @Param("userCode") String userCode);
+	
 }

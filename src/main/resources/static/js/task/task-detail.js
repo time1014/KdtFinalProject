@@ -72,85 +72,85 @@ document.addEventListener("DOMContentLoaded", function() {
 	document.querySelectorAll('[data-task-delete-close]').forEach(function(button) {
 		button.addEventListener('click', function() {
 			taskDeleteDialog.close();
-			});
 		});
-    
+	});
+
 });
 
 
 
 //  답글 폼 열기 및 이동 (수정됨)
 function toggleReplyForm(rootId, targetUserName, btnElement) {
-    const formElement = document.getElementById('reply-form-' + rootId);
-    const replyTextArea = document.getElementById('reply-content-' + rootId);
+	const formElement = document.getElementById('reply-form-' + rootId);
+	const replyTextArea = document.getElementById('reply-content-' + rootId);
 
-    const replyWrapper = btnElement.closest('.reply-wrapper');
-    const rootCommentItem = btnElement.closest('.root-comment');
+	const replyWrapper = btnElement.closest('.reply-wrapper');
+	const rootCommentItem = btnElement.closest('.root-comment');
 
-    //  입력창 이동 및 마진 정렬 위치 잡기
-    if (replyWrapper) {
-        // 대댓글의 답글 버튼을 누른 경우 -> 대댓글 묶음 박스 아래에 배치하고 대댓글과 라인(40px)을 맞춤
-        replyWrapper.after(formElement);
-        formElement.style.marginLeft = '40px'; 
-    } else if (rootCommentItem) {
-        // 원댓글의 답글 버튼을 누른 경우 -> 원댓글 아래에 배치하고 들여쓰기 없음
-        rootCommentItem.after(formElement);
-        formElement.style.marginLeft = '0px';  
-    }
+	//  입력창 이동 및 마진 정렬 위치 잡기
+	if (replyWrapper) {
+		// 대댓글의 답글 버튼을 누른 경우 -> 대댓글 묶음 박스 아래에 배치하고 대댓글과 라인(40px)을 맞춤
+		replyWrapper.after(formElement);
+		formElement.style.marginLeft = '40px';
+	} else if (rootCommentItem) {
+		// 원댓글의 답글 버튼을 누른 경우 -> 원댓글 아래에 배치하고 들여쓰기 없음
+		rootCommentItem.after(formElement);
+		formElement.style.marginLeft = '0px';
+	}
 
-    // 2 열기/닫기 토글 및 태그(@) 삽입 규칙 일치화
-    if (formElement.style.display === 'none' || formElement.getAttribute('data-target-user') !== targetUserName) {
-        formElement.style.display = 'block';
-        
-        if (targetUserName && targetUserName !== 'null' && targetUserName !== '') {
-            replyTextArea.value = `@${targetUserName} `;
-        } else {
-            replyTextArea.value = '';
-        }
-        
-        formElement.setAttribute('data-target-user', targetUserName);
-        replyTextArea.focus();
-    } else {
-        closeReplyForm(rootId);
-    }
+	// 2 열기/닫기 토글 및 태그(@) 삽입 규칙 일치화
+	if (formElement.style.display === 'none' || formElement.getAttribute('data-target-user') !== targetUserName) {
+		formElement.style.display = 'block';
+
+		if (targetUserName && targetUserName !== 'null' && targetUserName !== '') {
+			replyTextArea.value = `@${targetUserName} `;
+		} else {
+			replyTextArea.value = '';
+		}
+
+		formElement.setAttribute('data-target-user', targetUserName);
+		replyTextArea.focus();
+	} else {
+		closeReplyForm(rootId);
+	}
 }
 
 
 
 //  CSRF 토큰을 가져오는 공통 함수
 function getCsrfToken() {
-        const headerMeta = document.querySelector('meta[name="_csrf_header"]');
-        const tokenMeta = document.querySelector('meta[name="_csrf"]');
-        return {
-            header: headerMeta ? headerMeta.getAttribute('content') : 'X-CSRF-TOKEN',
-            token: tokenMeta ? tokenMeta.getAttribute('content') : ''
-        };
-    }
-	  
-	  function showToast(message, isError = false) {
-	          let toastWrap = document.getElementById('dynamicToast');
-	          if (toastWrap) toastWrap.remove(); 
+	const headerMeta = document.querySelector('meta[name="_csrf_header"]');
+	const tokenMeta = document.querySelector('meta[name="_csrf"]');
+	return {
+		header: headerMeta ? headerMeta.getAttribute('content') : 'X-CSRF-TOKEN',
+		token: tokenMeta ? tokenMeta.getAttribute('content') : ''
+	};
+}
 
-	          toastWrap = document.createElement('div');
-	          toastWrap.id = 'dynamicToast';
-	          toastWrap.className = 'toast-wrap';
-	          
-	          toastWrap.innerHTML = `<div class="toast-msg ${isError ? 'toast-error' : 'toast-success'}">${message}</div>`;
-	          document.body.appendChild(toastWrap);
+function showToast(message, isError = false) {
+	let toastWrap = document.getElementById('dynamicToast');
+	if (toastWrap) toastWrap.remove();
 
-	      
-	          setTimeout(() => {
-	              if (document.body.contains(toastWrap)) toastWrap.remove();
-	          }, 3500); 
-	      }
+	toastWrap = document.createElement('div');
+	toastWrap.id = 'dynamicToast';
+	toastWrap.className = 'toast-wrap';
 
-	      // 2커스텀 삭제 확인 모달 (Promise 기반)
-	      function showConfirm(title, desc) {
-	          return new Promise((resolve) => {
-	              const overlay = document.createElement('div');
-	              overlay.className = 'custom-modal-overlay';
-	              
-	              overlay.innerHTML = `
+	toastWrap.innerHTML = `<div class="toast-msg ${isError ? 'toast-error' : 'toast-success'}">${message}</div>`;
+	document.body.appendChild(toastWrap);
+
+
+	setTimeout(() => {
+		if (document.body.contains(toastWrap)) toastWrap.remove();
+	}, 3500);
+}
+
+// 2커스텀 삭제 확인 모달 (Promise 기반)
+function showConfirm(title, desc) {
+	return new Promise((resolve) => {
+		const overlay = document.createElement('div');
+		overlay.className = 'custom-modal-overlay';
+
+		overlay.innerHTML = `
 	                  <div class="custom-modal-box">
 	                      <div class="custom-modal-title">${title}</div>
 	                      <div class="custom-modal-desc">${desc}</div>
@@ -160,261 +160,259 @@ function getCsrfToken() {
 	                      </div>
 	                  </div>
 	              `;
-	              document.body.appendChild(overlay);
+		document.body.appendChild(overlay);
 
-	              // CSS 트랜지션 트리거
-	              setTimeout(() => overlay.classList.add('show'), 10);
+		// CSS 트랜지션 트리거
+		setTimeout(() => overlay.classList.add('show'), 10);
 
-	              const close = (result) => {
-	                  overlay.classList.remove('show');
-	                  setTimeout(() => {
-	                      if (document.body.contains(overlay)) overlay.remove();
-	                      resolve(result);
-	                  }, 200); 
-	              };
+		const close = (result) => {
+			overlay.classList.remove('show');
+			setTimeout(() => {
+				if (document.body.contains(overlay)) overlay.remove();
+				resolve(result);
+			}, 200);
+		};
 
-	              document.getElementById('modalCancelBtn').onclick = () => close(false);
-	              document.getElementById('modalDeleteBtn').onclick = () => close(true);
-	          });
-	      }	  
-	  
-	  
-	  
-	  
-		  // 💡 새롭게 추가하는 부분 새로고침 함수
-		  function reloadCommentList() {
-		      const projectId = document.getElementById('currentProjectId').value; 
-		      const currentTaskId = document.getElementById('currentTaskId').value; // 실시간으로 가져오기
-
-		      fetch(`/api/task/comments/fragment/${currentTaskId}?projectId=${projectId}`)
-		          .then(response => response.text())
-		          .then(html => {
-		              document.getElementById('commentArea').outerHTML = html;
-		              const commentCount = document.querySelectorAll('#commentArea .comment-item').length;
-		              document.getElementById('commentCount').textContent = commentCount;
-		          })
-		          .catch(err => console.error("댓글 목록 갱신 실패:", err));
-		  }
-
-		  // 1. 댓글 등록
-		  function submitComment(parentCommentId) {
-		      let contentId = parentCommentId ? 'reply-content-' + parentCommentId : 'mainCommentContent';
-		      let contentElement = document.getElementById(contentId);
-		      let content = contentElement.value;
-
-		      if (!content.trim()) {
-		          showToast('댓글 내용을 입력해주세요.', true);
-		          contentElement.focus();
-		          return;
-		      }
-
-		      const currentTaskId = document.getElementById('currentTaskId').value; // 실시간으로 가져오기
-
-		      let requestData = {
-		          taskId: currentTaskId,
-		          taskComment: content.trim(),
-		          parentCommentId: parentCommentId 
-		      };
-
-		      fetch(`/api/task/comments/${currentTaskId}`, {
-		          method: 'POST',
-		          headers: { 
-		              'Content-Type': 'application/json',
-		              [getCsrfToken().header]: getCsrfToken().token  
-		          },
-		          body: JSON.stringify(requestData)
-		      })
-		      .then(response => {
-		          if (response.ok) {
-		              showToast('댓글이 등록되었습니다.', false); 
-		              contentElement.value = ''; 
-		              reloadCommentList();      
-		          } else {
-		              showToast('댓글 등록에 실패했습니다.', true);
-		          }
-		      });
-		  }
-
-		  // 2. 댓글 수정
-		  function updateComment(commentId) {
-		      const newContent = document.getElementById('edit-content-' + commentId).value;
-		      if (!newContent.trim()) { 
-		          showToast('수정할 내용을 입력해주세요.', true); 
-		          return; 
-		      }
-
-		      fetch(`/api/task/comments/${commentId}`, {
-		          method: 'PUT',
-		          headers: { 
-		              'Content-Type': 'application/json',
-		              [getCsrfToken().header]: getCsrfToken().token  
-		          },
-		          body: JSON.stringify({ taskComment: newContent })
-		      })
-		      .then(response => {
-		          if (response.ok) { 
-		              showToast('수정되었습니다.', false);
-		              reloadCommentList(); 
-		          } else {
-		              showToast('수정 권한이 없거나 실패했습니다.', true);
-		          }
-		      });
-		  }
-
-		  // 3. 댓글 삭제
-		  function deleteComment(commentId) {
-		      showConfirm('댓글 삭제', '정말 이 댓글을 삭제하시겠습니까?').then((isConfirmed) => {
-		          if (isConfirmed) {
-		              fetch(`/api/task/comments/${commentId}`, {
-		                  method: 'DELETE',
-		                  headers: {
-		                      [getCsrfToken().header]: getCsrfToken().token  
-		                  }
-		              })
-		              .then(response => {
-		                  if (response.ok) { 
-		                      showToast('삭제되었습니다.', false);
-		                      reloadCommentList(); // 💡 부분 새로고침!
-		                  } else {
-		                      showToast('삭제 권한이 없거나 실패했습니다.', true);
-		                  }
-		              });
-		          }
-		      });
-		  }
+		document.getElementById('modalCancelBtn').onclick = () => close(false);
+		document.getElementById('modalDeleteBtn').onclick = () => close(true);
+	});
+}
 
 
-	    // 3. 댓글 수정 폼 열기/닫기 토글 
-	    function toggleEditForm(commentId) {
-	        const textElement = document.getElementById('comment-text-' + commentId);
-	        const formElement = document.getElementById('edit-form-' + commentId);
-	        const editTextArea = document.getElementById('edit-content-' + commentId);
-
-	        if (formElement.style.display === 'none') {
-	            textElement.style.display = 'none';
-	            formElement.style.display = 'block';
-	            editTextArea.focus();
-	        } else {
-	            textElement.style.display = 'block';
-	            formElement.style.display = 'none';
-	            editTextArea.value = textElement.innerText;
-	        }
-	    }
-
-		//답글 취소
-		// 취소 버튼을 눌렀을 때 완전히 창을 닫는 함수
-		function closeReplyForm(rootId) {
-		    const formElement = document.getElementById('reply-form-' + rootId);
-		    const replyTextArea = document.getElementById('reply-content-' + rootId);
-		    
-		    if(formElement) {
-		        formElement.style.display = 'none';
-		        formElement.removeAttribute('data-target-user');
-		    }
-		    if(replyTextArea) {
-		        replyTextArea.value = '';
-		    }
-		}
-		// '@' 태그된 대댓글 들여쓰기 처리
-		function applyNestedReplyIndentation() {
-		    document.querySelectorAll('.reply-comment .comment-body').forEach(function(body) {
-		        if (body.innerText.trim().startsWith('@')) {
-		            const wrapper = body.closest('.reply-wrapper');
-		            if (wrapper) {
-		                wrapper.style.marginLeft = '40px'; // 들여쓰기 픽셀 조정 가능
-		            }
-		        }
-		    });
-		}
-		
 
 
-					// ── 소요시간 등록 모달 ──
-					function openTimeRegisterModal() {
-					    const currentTaskId = document.getElementById('currentTaskId').value; 
-					    const rangeEl = document.getElementById('trmProgressRange');
-					    const currentProgress = rangeEl ? rangeEl.value : 0; 
+// 💡 새롭게 추가하는 부분 새로고침 함수
+function reloadCommentList() {
+	const projectId = document.getElementById('currentProjectId').value;
+	const currentTaskId = document.getElementById('currentTaskId').value; // 실시간으로 가져오기
 
-					    applyTrmProgressLock(currentTaskId, currentProgress);
-					    document.getElementById('timeRegisterModal').style.display = 'flex';
-					    document.body.style.overflow = 'hidden';
-					}
+	fetch(`/api/task/comments/fragment/${currentTaskId}?projectId=${projectId}`)
+		.then(response => response.text())
+		.then(html => {
+			document.getElementById('commentArea').outerHTML = html;
+			const commentCount = document.querySelectorAll('#commentArea .comment-item').length;
+			document.getElementById('commentCount').textContent = commentCount;
+		})
+		.catch(err => console.error("댓글 목록 갱신 실패:", err));
+}
 
-					function closeTimeRegisterModal() {
-						document.getElementById('timeRegisterModal').style.display = 'none';
-						document.body.style.overflow = '';
-					}
+// 1. 댓글 등록
+function submitComment(parentCommentId) {
+	let contentId = parentCommentId ? 'reply-content-' + parentCommentId : 'mainCommentContent';
+	let contentElement = document.getElementById(contentId);
+	let content = contentElement.value;
 
-					// range input의 트랙을 현재 값(min~max 대비 %)만큼 색이 채워지도록 갱신
-					function updateTrmRangeFill(rangeEl) {
-						const min = parseInt(rangeEl.min) || 0;
-						const max = parseInt(rangeEl.max) || 100;
-						const val = parseInt(rangeEl.value) || 0;
-						const percent = max > min ? ((val - min) / (max - min)) * 100 : 0;
-						const filledColor = rangeEl.disabled ? '#94a3b8' : '#6D5EF7';
-						rangeEl.style.background =
-							`linear-gradient(to right, ${filledColor} 0%, ${filledColor} ${percent}%, #e2e8f0 ${percent}%, #e2e8f0 100%)`;
-					}
+	if (!content.trim()) {
+		showToast('댓글 내용을 입력해주세요.', true);
+		contentElement.focus();
+		return;
+	}
 
-					// 하위일감 유무에 따라 진척도 편집 가능 여부/범위 결정
-					// - 하위일감 있음: 완전 잠금
-					// - 하위일감 없음: 편집 가능, 단 현재값보다 낮게는 불가
-					// (소요시간 탭의 등록 화면과 동일한 규칙)
-					function applyTrmProgressLock(taskId, currentProgress) {
-						const rangeEl = document.getElementById('trmProgressRange');
-						const hint = document.getElementById('trmProgressHint');
-						if (!rangeEl) return;
+	const currentTaskId = document.getElementById('currentTaskId').value; // 실시간으로 가져오기
 
-						rangeEl.disabled = false;
-						rangeEl.classList.remove('trm-progress-locked');
-						rangeEl.min = 0;
-						rangeEl.value = currentProgress;
-						document.getElementById('trmProgressText').textContent = currentProgress + '%';
-						hint.style.display = 'none';
-						updateTrmRangeFill(rangeEl);
+	let requestData = {
+		taskId: currentTaskId,
+		taskComment: content.trim(),
+		parentCommentId: parentCommentId
+	};
 
-						fetch('/hasChildTask?taskId=' + encodeURIComponent(taskId))
-							.then(res => res.json())
-							.then(hasChild => {
-								if (hasChild) {
-									rangeEl.disabled = true;
-									rangeEl.classList.add('trm-progress-locked');
-									rangeEl.value = currentProgress;
-									document.getElementById('trmProgressText').textContent = currentProgress + '%';
-									hint.textContent = '* 완료되지 않은 하위일감이 있어 진척도를 수정할 수 없습니다.';
-									hint.style.display = 'block';
-								} else {
-									rangeEl.disabled = false;
-									rangeEl.classList.remove('trm-progress-locked');
-									rangeEl.min = currentProgress;
-									hint.textContent = '* 진척도는 현재보다 낮게 설정할 수 없습니다.';
-									hint.style.display = 'block';
-								}
-								updateTrmRangeFill(rangeEl);
-							})
-							.catch(() => {
-								rangeEl.disabled = false;
-								rangeEl.min = 0;
-								hint.style.display = 'none';
-								updateTrmRangeFill(rangeEl);
-							});
-					}
-
-					const trmProgressRange = document.getElementById('trmProgressRange');
-					if (trmProgressRange) {
-						trmProgressRange.addEventListener('input', function() {
-							document.getElementById('trmProgressText').textContent = this.value + '%';
-							updateTrmRangeFill(this);
-						});
-					}
-		
-		
-		
-
-		// 최초 화면 로드 시 실행
-		document.addEventListener("DOMContentLoaded", function() {
-		    applyNestedReplyIndentation();
+	fetch(`/api/task/comments/${currentTaskId}`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			[getCsrfToken().header]: getCsrfToken().token
+		},
+		body: JSON.stringify(requestData)
+	})
+		.then(response => {
+			if (response.ok) {
+				showToast('댓글이 등록되었습니다.', false);
+				contentElement.value = '';
+				reloadCommentList();
+			} else {
+				showToast('댓글 등록에 실패했습니다.', true);
+			}
 		});
-		
+}
 
-	  
+// 2. 댓글 수정
+function updateComment(commentId) {
+	const newContent = document.getElementById('edit-content-' + commentId).value;
+	if (!newContent.trim()) {
+		showToast('수정할 내용을 입력해주세요.', true);
+		return;
+	}
+
+	fetch(`/api/task/comments/${commentId}`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			[getCsrfToken().header]: getCsrfToken().token
+		},
+		body: JSON.stringify({ taskComment: newContent })
+	})
+		.then(response => {
+			if (response.ok) {
+				showToast('수정되었습니다.', false);
+				reloadCommentList();
+			} else {
+				showToast('수정 권한이 없거나 실패했습니다.', true);
+			}
+		});
+}
+
+// 3. 댓글 삭제
+function deleteComment(commentId) {
+	showConfirm('댓글 삭제', '정말 이 댓글을 삭제하시겠습니까?').then((isConfirmed) => {
+		if (isConfirmed) {
+			fetch(`/api/task/comments/${commentId}`, {
+				method: 'DELETE',
+				headers: {
+					[getCsrfToken().header]: getCsrfToken().token
+				}
+			})
+				.then(response => {
+					if (response.ok) {
+						showToast('삭제되었습니다.', false);
+						reloadCommentList(); // 💡 부분 새로고침!
+					} else {
+						showToast('삭제 권한이 없거나 실패했습니다.', true);
+					}
+				});
+		}
+	});
+}
+
+
+// 3. 댓글 수정 폼 열기/닫기 토글 
+function toggleEditForm(commentId) {
+	const textElement = document.getElementById('comment-text-' + commentId);
+	const formElement = document.getElementById('edit-form-' + commentId);
+	const editTextArea = document.getElementById('edit-content-' + commentId);
+
+	if (formElement.style.display === 'none') {
+		textElement.style.display = 'none';
+		formElement.style.display = 'block';
+		editTextArea.focus();
+	} else {
+		textElement.style.display = 'block';
+		formElement.style.display = 'none';
+		editTextArea.value = textElement.innerText;
+	}
+}
+
+//답글 취소
+// 취소 버튼을 눌렀을 때 완전히 창을 닫는 함수
+function closeReplyForm(rootId) {
+	const formElement = document.getElementById('reply-form-' + rootId);
+	const replyTextArea = document.getElementById('reply-content-' + rootId);
+
+	if (formElement) {
+		formElement.style.display = 'none';
+		formElement.removeAttribute('data-target-user');
+	}
+	if (replyTextArea) {
+		replyTextArea.value = '';
+	}
+}
+// '@' 태그된 대댓글 들여쓰기 처리
+function applyNestedReplyIndentation() {
+	document.querySelectorAll('.reply-comment .comment-body').forEach(function(body) {
+		if (body.innerText.trim().startsWith('@')) {
+			const wrapper = body.closest('.reply-wrapper');
+			if (wrapper) {
+				wrapper.style.marginLeft = '40px'; // 들여쓰기 픽셀 조정 가능
+			}
+		}
+	});
+}
+
+
+
+// ── 소요시간 등록 모달 ──
+function openTimeRegisterModal() {
+	const currentTaskId = document.getElementById('currentTaskId').value;
+	const rangeEl = document.getElementById('trmProgressRange');
+	const currentProgress = rangeEl ? rangeEl.value : 0;
+
+	applyTrmProgressLock(currentTaskId, currentProgress);
+	document.getElementById('timeRegisterModal').style.display = 'flex';
+	document.body.style.overflow = 'hidden';
+}
+
+function closeTimeRegisterModal() {
+	document.getElementById('timeRegisterModal').style.display = 'none';
+	document.body.style.overflow = '';
+}
+
+// range input의 트랙을 현재 값(min~max 대비 %)만큼 색이 채워지도록 갱신
+function updateTrmRangeFill(rangeEl) {
+	const min = parseInt(rangeEl.min) || 0;
+	const max = parseInt(rangeEl.max) || 100;
+	const val = parseInt(rangeEl.value) || 0;
+	const percent = max > min ? ((val - min) / (max - min)) * 100 : 0;
+	const filledColor = rangeEl.disabled ? '#94a3b8' : '#6D5EF7';
+	rangeEl.style.background =
+		`linear-gradient(to right, ${filledColor} 0%, ${filledColor} ${percent}%, #e2e8f0 ${percent}%, #e2e8f0 100%)`;
+}
+
+// 하위일감 유무에 따라 진척도 편집 가능 여부/범위 결정
+// - 하위일감 있음: 완전 잠금
+// - 하위일감 없음: 편집 가능, 단 현재값보다 낮게는 불가
+// (소요시간 탭의 등록 화면과 동일한 규칙)
+function applyTrmProgressLock(taskId, currentProgress) {
+	const rangeEl = document.getElementById('trmProgressRange');
+	const hint = document.getElementById('trmProgressHint');
+	if (!rangeEl) return;
+
+	rangeEl.disabled = false;
+	rangeEl.classList.remove('trm-progress-locked');
+	rangeEl.min = 0;
+	rangeEl.value = currentProgress;
+	document.getElementById('trmProgressText').textContent = currentProgress + '%';
+	hint.style.display = 'none';
+	updateTrmRangeFill(rangeEl);
+
+	fetch('/hasChildTask?taskId=' + encodeURIComponent(taskId))
+		.then(res => res.json())
+		.then(hasChild => {
+			if (hasChild) {
+				rangeEl.disabled = true;
+				rangeEl.classList.add('trm-progress-locked');
+				rangeEl.value = currentProgress;
+				document.getElementById('trmProgressText').textContent = currentProgress + '%';
+				hint.textContent = '* 완료되지 않은 하위일감이 있어 진척도를 수정할 수 없습니다.';
+				hint.style.display = 'block';
+			} else {
+				rangeEl.disabled = false;
+				rangeEl.classList.remove('trm-progress-locked');
+				rangeEl.min = 0;
+				hint.style.display = 'none';
+			}
+			updateTrmRangeFill(rangeEl);
+		})
+		.catch(() => {
+			rangeEl.disabled = false;
+			rangeEl.min = 0;
+			hint.style.display = 'none';
+			updateTrmRangeFill(rangeEl);
+		});
+}
+
+const trmProgressRange = document.getElementById('trmProgressRange');
+if (trmProgressRange) {
+	trmProgressRange.addEventListener('input', function() {
+		document.getElementById('trmProgressText').textContent = this.value + '%';
+		updateTrmRangeFill(this);
+	});
+}
+
+
+
+
+// 최초 화면 로드 시 실행
+document.addEventListener("DOMContentLoaded", function() {
+	applyNestedReplyIndentation();
+});
+
+

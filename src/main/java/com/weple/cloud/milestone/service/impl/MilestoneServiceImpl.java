@@ -270,5 +270,11 @@ public class MilestoneServiceImpl implements MilestoneService {
 	public int deleteMilestone(Long milestoneId) {
 		return milestoneMapper.deleteMilestone(milestoneId);
 	}
+	
+	// 프로젝트 멤버 여부
+	@Override
+    public boolean checkProjectMembership(Long projectId, String userCode) {
+        return milestoneMapper.checkProjectMembership(projectId, userCode) > 0;
+    }
 
 }

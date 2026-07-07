@@ -66,7 +66,7 @@
       <!-- 작업분류 -->
       <div class="edit-field">
         <label>작업분류 <span class="req">*</span></label>
-        <select name="workName" required>
+        <select id="workNameSelect" name="workName" required>
           <option value="" disabled hidden>작업분류를 선택하세요.</option>
           <option th:each="v : ${workTypeList}"
                   th:value="${v.taskClassificationId}"
@@ -75,16 +75,16 @@
         </select>
       </div>
 
-      <!-- 진척도 (고정, 소요시간에 따라 자동계산만 됨) -->
+      <!-- 진척도 (수정 가능, 일감 상세조회의 진척도와 동일하게 반영됨) -->
       <div class="edit-field">
         <label>진척도</label>
         <div class="progress-wrap">
-          <input type="range" id="progressRange" disabled
-                 min="0" max="100" value="0" class="progress-locked">
-          <input type="hidden" id="progressValue" name="progress" value="0">
+          <input type="range" id="progressRange" name="progress"
+                 min="0" max="100" step="10" value="0">
           <span id="progressText" class="progress-text">0%</span>
         </div>
       </div>
+      <p class="progress-hint" id="progressHint" style="display: none;"></p>
 
       <!-- 내용 -->
       <div class="edit-field edit-field-textarea">
@@ -105,29 +105,96 @@
 
 <!-- Thymeleaf → JS -->
 <script th:inline="javascript">
-const estimatedTime = /*[[${workTime.estimatedTime}]]*/ 0;
-const savedSpentHour = /*[[${workTime.spentHour}]]*/ 0;
+const editTaskId = /*[[${workTime.taskId}]]*/ '';
+// 일감의 현재 진척도 (일감 상세조회 진척도와 동일한 값에서 시작)
+const currentTaskProgress = /*[[${workTime.taskProgress}]]*/ 0;
 
-// ── 진척도 초기값 설정 (고정 표시, 소요시간에 연동해서만 갱신됨) ──
-function setProgress(pct) {
-  document.getElementById('progressRange').value = pct;
-  document.getElementById('progressValue').value = pct;
-  document.getElementById('progressText').textContent = pct + '%';
+// range input의 트랙을 현재 값(min~max 대비 %)만큼 색이 채워지도록 갱신
+function updateRangeFill(rangeEl) {
+  const min = parseInt(rangeEl.min) || 0;
+  const max = parseInt(rangeEl.max) || 100;
+  const val = parseInt(rangeEl.value) || 0;
+  const percent = max > min ? ((val - min) / (max - min)) * 100 : 0;
+  const filledColor = rangeEl.disabled ? '#94a3b8' : '#6D5EF7';
+  rangeEl.style.background =
+    `linear-gradient(to right, ${filledColor} 0%, ${filledColor} ${percent}%, #e2e8f0 ${percent}%, #e2e8f0 100%)`;
 }
-(function() {
-  const pct = estimatedTime > 0
-    ? Math.min(Math.round(savedSpentHour / estimatedTime * 100), 100)
-    : 0;
-  setProgress(pct);
-})();
 
-// ── 소요시간 변경 시 진척도 자동계산 (사용자가 직접 조작은 불가) ──
-document.getElementById('spentHourInput').addEventListener('input', function() {
-  if (!estimatedTime) return;
-  const pct = Math.min(Math.round((parseFloat(this.value)||0) / estimatedTime * 100), 100);
-  setProgress(pct);
+function setProgress(pct) {
+  const rangeEl = document.getElementById('progressRange');
+  rangeEl.value = pct;
+  document.getElementById('progressText').textContent = pct + '%';
+  updateRangeFill(rangeEl);
+}
+
+// 작업분류 select에서 "완료" 라벨을 가진 <option>을 찾음
+function findCompleteWorkNameOption(selectEl) {
+  return Array.from(selectEl.options).find(o => o.textContent.trim() === '완료');
+}
+
+// 진척도가 100%가 되면 작업분류를 자동으로 "완료"로 맞춰줌
+function syncWorkNameWithProgress(progressValue) {
+  const workNameSelect = document.getElementById('workNameSelect');
+  if (!workNameSelect) return;
+  const completeOption = findCompleteWorkNameOption(workNameSelect);
+  if (parseInt(progressValue) === 100 && completeOption) {
+    workNameSelect.value = completeOption.value;
+  }
+}
+
+// 하위일감 유무에 따라 진척도 편집 가능 여부 결정
+// (완료되지 않은 하위일감이 있으면 잠금, 없으면 0~100% 자유 편집 - 현재값보다 낮게도 설정 가능)
+function applyProgressLock() {
+  const rangeEl = document.getElementById('progressRange');
+  const hint = document.getElementById('progressHint');
+  fetch('/hasChildTask?taskId=' + encodeURIComponent(editTaskId))
+    .then(res => res.json())
+    .then(hasChild => {
+      if (hasChild) {
+        rangeEl.disabled = true;
+        rangeEl.classList.add('progress-locked');
+        rangeEl.min = currentTaskProgress;
+        setProgress(currentTaskProgress);
+        hint.textContent = '* 완료되지 않은 하위일감이 있어 진척도를 수정할 수 없습니다.';
+        hint.style.display = 'block';
+      } else {
+        rangeEl.disabled = false;
+        rangeEl.classList.remove('progress-locked');
+        rangeEl.min = 0;
+        hint.style.display = 'none';
+        updateRangeFill(rangeEl);
+      }
+    })
+    .catch(() => {
+      rangeEl.disabled = false;
+      rangeEl.min = 0;
+      hint.style.display = 'none';
+      updateRangeFill(rangeEl);
+    });
+}
+
+setProgress(currentTaskProgress);
+if (editTaskId) {
+  applyProgressLock();
+}
+
+document.getElementById('progressRange').addEventListener('input', function() {
+  document.getElementById('progressText').textContent = this.value + '%';
+  updateRangeFill(this);
+  syncWorkNameWithProgress(this.value);
 });
 
+// 진척도가 100%가 아닌데 작업분류를 "완료"로 직접 선택하려는 경우 막음
+document.getElementById('workNameSelect').addEventListener('change', function() {
+  const completeOption = findCompleteWorkNameOption(this);
+  if (completeOption && this.value === completeOption.value) {
+    const currentProgress = parseInt(document.getElementById('progressRange').value) || 0;
+    if (currentProgress !== 100) {
+      alert('진척도가 100%가 아니면 작업분류를 완료로 설정할 수 없습니다.');
+      this.value = '';
+    }
+  }
+});
 </script>
 
 <style>
@@ -205,15 +272,61 @@ document.getElementById('spentHourInput').addEventListener('input', function() {
   color: #1e293b;
 }
 
-/* 진척도 (고정 표시 - 드래그 불가) */
+/* 진척도 (수정 가능) */
 .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
-.progress-wrap input[type="range"] { flex: 1; accent-color: #6D5EF7; }
+.progress-wrap input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  background: #e2e8f0; /* JS가 값에 따라 linear-gradient로 덮어씀 */
+}
+.progress-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6D5EF7;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #6D5EF7;
+}
+.progress-wrap input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6D5EF7;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #6D5EF7;
+}
+.progress-wrap input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: transparent;
+}
 .progress-wrap input[type="range"].progress-locked {
-  opacity: .6;
+  opacity: .5;
   cursor: not-allowed;
-  pointer-events: none;
+}
+.progress-wrap input[type="range"].progress-locked::-webkit-slider-thumb {
+  background: #94a3b8;
+  box-shadow: 0 0 0 1px #94a3b8;
+}
+.progress-wrap input[type="range"].progress-locked::-moz-range-thumb {
+  background: #94a3b8;
+  box-shadow: 0 0 0 1px #94a3b8;
 }
 .progress-text { width: 38px; font-weight: 700; color: #6D5EF7; text-align: right; }
+.progress-hint {
+  margin: -8px 24px 0;
+  padding-left: 102px;
+  font-size: 12px;
+  color: #94a3b8;
+}
 
 /* textarea */
 .edit-field-textarea { align-items: flex-start; padding-top: 12px; }

@@ -70,6 +70,7 @@
                , t.task_title
                , t.task_describe
                , t.estimated_time
+               , t.task_progress AS taskProgress
 		FROM work_time w_tme
 		LEFT JOIN project p ON w_tme.project_id = p.project_id
 		LEFT JOIN users u ON u.user_code = w_tme.user_code

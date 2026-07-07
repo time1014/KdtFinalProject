@@ -86,13 +86,32 @@ public class TimeServiceImpl implements TimeService {
 	}
 
 	// 수정
+	@Transactional
 	@Override
 	public Map<String, Object> modifyProjectTime(WorkTimeVO workTimeVO) {
+		// 작업분류를 "완료"로 수정하려는 경우, 진척도가 100%가 아니거나
+		// 이 일감의 하위일감 중 미완료(100% 아님)가 하나라도 있으면 수정 자체를 막는다.
+		if (timeMapper.countCompletedClassification(workTimeVO.getWorkName()) > 0) {
+			if (workTimeVO.getProgress() == null || workTimeVO.getProgress() != 100L) {
+				throw new IllegalStateException("진척도가 100%가 아니면 작업분류를 완료로 등록할 수 없습니다.");
+			}
+			List<TaskVO> incompleteDescendants = new java.util.ArrayList<>();
+			collectIncompleteDescendants(workTimeVO.getTaskId(), incompleteDescendants, new java.util.HashSet<>());
+			if (!incompleteDescendants.isEmpty()) {
+				throw new IllegalStateException("완료되지 않은 하위일감이 있어 작업분류를 완료로 등록할 수 없습니다.");
+			}
+		}
+
 		Map<String, Object> map = new java.util.HashMap<>();
 		long result = timeMapper.updateProjectTime(workTimeVO);
 		// 프로시저 실행
 		if (result == 1) {
 			timeMapper.updateTaskSpentHours();
+			// 소요시간 수정 시에도 진척도를 함께 수정할 수 있도록, 전달된 진척도를
+			// 해당 일감(taskId)의 진척도에 그대로 반영한다. (일감 상세조회 진척도와 동일하게 유지)
+			if (workTimeVO.getProgress() != null) {
+				taskMapper.updateTaskProgress(workTimeVO.getTaskId(), workTimeVO.getProgress());
+			}
 		}
 		map.put("result", result);
 		return map;

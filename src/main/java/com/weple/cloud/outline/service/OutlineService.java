@@ -12,5 +12,9 @@ public interface OutlineService {
 
 	ProjectProgressDTO getProjectProgress(Long projectId);
 
+	boolean checkOutlineModuleActive(Long projectId);
+
+	boolean checkProjectMembership(Long projectId, String userCode);
+
 
 }

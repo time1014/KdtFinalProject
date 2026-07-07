@@ -39,6 +39,8 @@ public class WorkTimeVO {
 	private Long totalSpentHour;
 	private long taskClassificationId;
 	private long estimatedTime;
-	// 소요시간 등록 모달에서 함께 넘어오는 진척도 값 (미전송/잠금 시 null)
+	// 소요시간 등록/수정 모달에서 함께 넘어오는 진척도 값 (미전송/잠금 시 null)
 	private Long progress;
+	// 일감의 현재 진척도 (수정 폼 초기값 표시용, DB task.task_progress)
+	private Long taskProgress;
 }
