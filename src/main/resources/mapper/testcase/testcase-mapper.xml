@@ -7,7 +7,7 @@
 			task_id AS taskId,
 			task_title AS taskTitle
 		FROM task
-		WHERE project_id = #{pId}
+		WHERE project_id = #{pId} AND deleted_yn = 'N';
 	</select>
 	<!-- 테스크케이스 진행상황 목록 -->
 	<select id="coverageStatus" resultType="CoverdStatusVO">
