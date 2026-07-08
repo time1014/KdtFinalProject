@@ -123,7 +123,9 @@
 
 /* 인라인 편집/삭제 제어 버튼 */
 .milestone-edit-btn,
-.milestone-delete-btn {
+.milestone-delete-btn,
+.milestone-cancel-btn,
+.milestone-save-btn {
     padding: 6px 12px;
     border: none;
     border-radius: 8px;
@@ -135,21 +137,99 @@
     transition: background-color .2s ease, box-shadow .2s ease;
 }
 
-.milestone-edit-btn {
+.milestone-edit-btn,
+.milestone-save-btn {
     background-color: #6D5EF7;
     color: white;
 }
-.milestone-edit-btn:hover {
+.milestone-edit-btn:hover,
+.milestone-save-btn:hover {
     background-color: #5B4FEA;
 }
 
-.milestone-delete-btn {
+.milestone-delete-btn,
+.milestone-cancel-btn {
     background-color: #e55039;
     color: white;
 }
-.milestone-delete-btn:hover {
+.milestone-delete-btn:hover,
+.milestone-cancel-btn:hover {
     background-color: #c83b25;
 }
+
+
+.edit-mode-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.milestone-edit-inputs {
+    display: flex;
+    gap: 19px;
+    align-items: center;
+}
+
+/* 폼 공통 기본 인풋 스타일링 */
+.edit-title-input,
+.edit-date-input,
+.edit-describe-input {
+    height: 38px;
+    border: 1px solid #DDD6FE;
+    border-radius: 8px;
+    color: #111827;
+    font-size: 14px;
+    background-color: #FFFFFF;
+    padding: 0 12px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 포커스 시 테마 컬러(#6D5EF7)와 은은한 섀도우 처리 */
+.edit-title-input:focus,
+.edit-date-input:focus,
+.edit-describe-input:focus {
+    border-color: #6D5EF7;
+    box-shadow: 0 0 0 3px rgba(109, 94, 247, 0.12);
+    background-color: #FAFAFC;
+}
+
+/* 개별 인풋 커스텀 스펙 */
+
+/* 1. 마일스톤 명칭 입력 */
+.edit-title-input {
+    width: 260px;
+    font-weight: 600;
+}
+
+/* 2. 날짜 선택 피커 */
+.edit-date-input {
+    width: 150px;
+    font-family: inherit;
+    color: #4b5563;
+    cursor: pointer;
+}
+
+/* 3. 하단 마일스톤 설명 입력 (전체 너비 확보 및 패딩 보정) */
+.edit-describe-input {
+    width: 100% !important; /* HTML 내부 인라인 스타일 상쇄 및 고정 */
+    height: 40px;
+    padding: 8px 14px !important;
+    font-size: 15px;
+    color: #374151;
+}
+
+/* 인풋 플레이스홀더 감성 일치 */
+.edit-title-input::placeholder,
+.edit-describe-input::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+
 
 /* 4. 메인 진행률 바 및 요약 */
 .milestone-progress-row {
