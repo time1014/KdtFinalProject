@@ -52,9 +52,37 @@
   </tr>
 </table>
 
-# 📌 프로젝트명 (Project Name)
-> **프로젝트에 대한 간단한 한 줄 설명을 작성해주세요.** 
-> (예: 효율적인 협업을 위한 일감 및 테스트케이스 추적 관리 시스템)
+# 📌 Spring을 활용한 클라우드 기반 프로젝트 관리 시스템 (WEPLE)
+> **레드마인을 기반으로 한 사용자들의 일정관리와 일감 등록을 통합 관리하는 협업툴 서비스**
+
+<br>
+
+프로젝트 개요
+프로젝트명: 장애인 지원관리 시스템
+프로젝트 유형: 팀 프로젝트
+개발 목적
+장애인 지원 업무의 전산화
+역할별 업무 프로세스 분리 및 권한 기반 처리
+지원계획 및 지원결과 승인 흐름 구현
+첨부파일 및 수정이력 관리 기능 제공
+
+업무흐름 등 추가 내용 필
+
+## 🖥 메인 화면 및 아키텍처 (Overview & Architecture)
+
+### 1. 메인 화면
+<!-- 메인 화면 사진 캡처 이미지 또는 동작 GIF 추가 -->
+<img width="1917" height="940" alt="image" src="https://github.com/user-attachments/assets/c34f8d77-3bd6-4914-803c-b758498b3167" />
+
+
+
+### 2. 데이터베이스 구성도 (ERD)
+<!-- 데이터베이스 ERD 이미지 추가 (예: 일감, 이력, 댓글, 첨부파일 테이블 관계 등) -->
+<img width="4561" height="2862" alt="피피티용" src="https://github.com/user-attachments/assets/adab40a9-4575-4d13-9eda-821e251ee397" />
+
+### 3. 시스템 흐름도 (System Flowchart)
+<!-- 주요 비즈니스 로직(예: 일감 등록 -> 이력 저장 -> Toast 알림)의 흐름도 이미지 추가 -->
+![시스템 흐름도](이미지_주소_여기에_입력)
 
 <br>
 
@@ -74,54 +102,55 @@
 
 <br>
 
-## 💡 주요 구현 기능 (Key Features & Contributions)
+## 💡 주요 구현 기능 (Key Features)
 
 ### 1. 일감(Task) 관리 및 추적 시스템
-* **일감 CRUD 및 계층 구조 관리:** 일감 등록, 수정, 삭제 및 하위 일감(Sub-task) 등록/추적 기능 구현
-* **조회 권한 및 필터링 제어:** 관리자/소유자 권한에 따른 프로젝트 전체 접근 로직과 활성화된 일감(`deletedYn = 'N'`)만 필터링하여 조회하는 로직 구현
-* **소요 시간 추적:** 등록된 작업 소요 시간 기록 및 관리
-> <!-- 📸 일감 목록 또는 상세 화면 스크린샷 및 설명 추가 -->
+* 일감 등록, 수정, 삭제 및 하위 일감(Sub-task) 추적
+* 삭제 여부(`deletedYn = 'N'`) 기반 필터링 및 소요 시간 기록
+* 첨부파일 AWS S3
+<img width="1640" height="678" alt="일감 목록 일감" src="https://github.com/user-attachments/assets/69ec1efe-0484-4dcf-8ed5-58b7af782539" />
 
 ### 2. 일감 항목 변경 이력 관리 (History Tracking)
-* **상세 이력 테이블 설계:** 일감의 상태나 내용이 변경될 때마다 이전 값(`old_value`)과 새로운 값(`new_value`)을 기록하여 데이터 무결성과 변경 추적 지원
-* **Oracle DB 최적화:** 대용량 텍스트 변경 이력도 안전하게 담을 수 있도록 이력 테이블 컬럼 사이즈 최적화 적용
-> <!-- 📸 이력 조회 화면 스크린샷 및 설명 추가 -->
+* 일감 내용 수정 시 `old_value`와 `new_value`를 기록하여 변경 추적
+* 일감 내용 등록,수정 , 소요시간 등록 , 상위일감 연결 등 일감 관련 변경사항 기록 
+<img width="1505" height="830" alt="일감 항목 변경이력" src="https://github.com/user-attachments/assets/a89b028d-948d-4aa8-9b51-44b4149c5bf4" />
 
 ### 3. 비동기 댓글 및 답글 시스템
-* **계층형 댓글 구조:** 일감에 대한 댓글 및 답글 등록, 수정, 삭제 기능 구현 (부모/자식 요소를 구분한 프로필 이미지 렌더링 처리)
-* **Fetch API & Thymeleaf Fragment:** 댓글 작성 시 페이지 전체 새로고침 없이 Fragment를 활용하여 댓글 목록만 비동기적으로 갱신(Refresh)하도록 구현
-> <!-- 📸 댓글/답글 UI 스크린샷 및 설명 추가 -->
+* 부모/자식 계층형 댓글 구조 및 프로필 이미지 렌더링
+* Fetch API와 Thymeleaf Fragment를 활용한 비동기 댓글 리프레시
+<img width="1342" height="694" alt="삭제된 댓글 포함" src="https://github.com/user-attachments/assets/fd5767b5-273d-43b5-a7a8-2066211f11b2" />
+<img width="724" height="222" alt="image" src="https://github.com/user-attachments/assets/6fb0e278-018c-44c5-bd85-648f349a4a22" />
 
-### 4. Custom Toast 피드백 UI 개발
-* **시스템 피드백 제공:** 데이터 처리, 에러 핸들링, 유효성 검사 등 사용자의 작업 결과 상태를 즉각적으로 알리는 Toast 메시지 UI 구현
-* **Vanilla JS 기반:** 외부 라이브러리 의존 없이 순수 자바스크립트로 Custom Toast 함수를 개발하여 경량화 및 커스터마이징 용이성 확보
-> <!-- 📸 Toast 메시지 동작 화면(GIF 등) 및 설명 추가 -->
+### 4. Custom Toast 피드백 UI
+* 사용자 작업(저장, 수정, 에러 등) 결과를 즉각적으로 알리는 커스텀 피드백 UI
+* 댓글 내용 미작성 후 등록 , 댓글 등록 후 , 수정 , 삭제 등등에서 사용
+<img width="302" height="96" alt="댓글 등록 성공" src="https://github.com/user-attachments/assets/58ad3f27-8a93-46c3-9bac-eb2df43f1761" />
 
-### 5. 테스트 케이스 관리 및 일감 연동
-* **테스트 케이스 CRUD:** 테스트 케이스 목록 조회 및 등록, 수정, 삭제 기능 구현
-* **추적 및 매핑:** 생성된 테스트 케이스를 특정 일감과 연결하여 개발 내역과 테스트 내역을 통합 추적
-> <!-- 📸 테스트 케이스 연동 화면 스크린샷 및 설명 추가 -->
+### 5. 테스트 케이스 및 기타 기능
+* 테스트 케이스 생성 및 일감 연동 및 추적
+<img width="1664" height="829" alt="테스트 케이스 목록" src="https://github.com/user-attachments/assets/1d5aff65-dc75-42bd-a041-34ec389f2be6" />
 
-### 6. 캘린더 및 마일스톤 연동
-* **시각화:** 캘린더 뷰를 통해 일감의 일정 및 마일스톤 조회 기능 구현
-> <!-- 📸 캘린더 화면 스크린샷 및 설명 추가 -->
-
-### 7. 첨부파일 관리 (AWS S3)
-* 일감 내 첨부파일 업로드 및 파일 버전 업데이트 관리 로직 구현
-> <!-- 📸 첨부파일 영역 스크린샷 및 설명 추가 -->
+### 6. 캘린더 일정 확인
+* 캘린더를 통한 일감/마일스톤 시각화 및 추적
+<img width="1686" height="808" alt="캘린더" src="https://github.com/user-attachments/assets/3761984d-111f-4218-840f-15e8e7860304" />
+<img width="713" height="641" alt="캘린더 상세 모달" src="https://github.com/user-attachments/assets/587b8dd5-16d7-4601-8b61-332b36fcee73" />
 
 <br>
 
-## 🚀 Trouble Shooting / 핵심 기술 설명
-> **이 프로젝트를 진행하면서 겪었던 문제나, 특별히 신경 써서 구현한 기술적 고민(예: MyBatis 동적 쿼리 활용, 비동기 렌더링 최적화, 암호화 처리 등)을 추가로 작성하기 좋은 공간입니다.**
 
-* **이슈 1:** (예시) Thymeleaf Fragment와 Fetch API를 활용한 비동기 렌더링 최적화
-  * **해결 과정:** ...
-* **이슈 2:** ...
+## 🛠 기술 스택 (Tech Stack)
 
-<br>
+| 구분 | 사용 기술 |
+|------|----------|
+| **Frontend** | ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-005F0F?style=for-the-badge&logo=Thymeleaf&logoColor=white) |
+| **Backend** | ![Java](https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white) ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white) |
+| **Data & ORM** | ![Oracle](https://img.shields.io/badge/Oracle-F00000?style=for-the-badge&logo=oracle&logoColor=white) ![JPA](https://img.shields.io/badge/JPA-59666C?style=for-the-badge) ![MyBatis](https://img.shields.io/badge/MyBatis-000000?style=for-the-badge) |
+| **Cloud & Storage**| ![AWS S3](https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white) |
+| **Collaboration** | ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white) ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white) |
 
-## ⚙️ 실행 환경 및 설치 방법 (Getting Started)
-* Java Version: (예: 17)
-* Build Tool: (예: Gradle or Maven)
-* DB: Oracle
+
+
+## 🚀 Trouble Shooting (문제 해결)
+<!-- 해결했던 이슈 작성 -->
+* **이슈:** 프로젝트 기간 밖으로 일감을 등록하거나 각종 처리에 대한 예외 처리들
+* **해결:** js 조건 처리와 페이지 이동 처리 controller 등 수정
