@@ -57,16 +57,71 @@
 
 <br>
 
-프로젝트 개요
-프로젝트명: 장애인 지원관리 시스템
-프로젝트 유형: 팀 프로젝트
-개발 목적
-장애인 지원 업무의 전산화
-역할별 업무 프로세스 분리 및 권한 기반 처리
-지원계획 및 지원결과 승인 흐름 구현
-첨부파일 및 수정이력 관리 기능 제공
+프로젝트 목표
+WEPLE은 프로젝트 수행에 필요한 업무 관리, 일정 관리, 산출물 관리, 협업 기능을 하나의 플랫폼에서 제공하는 것을 목표로 합니다.
+프로젝트 구성원은 일감과 일정, 파일, 위키, 저장소 이력을 함께 확인할 수 있고, 관리자는 사용자와 권한, 프로젝트 설정을 통합적으로 관리할 수 있습니다.
 
-주요기능 ,업무흐름 등 추가 내용 필요 + 팀 멤버 + 역할 + 프로젝트 기간 (6/8~7/14)
+프로젝트 기간 
+2026/06/08 ~ 2026/07/15
+
+팀 구성
+이름	  주요 담당
+방진영	  일감, 테스트 케이스, 캘린더
+김병완	  로그인 및 인증, 사용자관리, 저장소 연동, 배포
+김은지	  프로젝트, 위키, 알림, 마이페이지, 칸반보드
+김민지	  그룹, 코드값, 소요시간, 파일관리
+송민규	  공통 UI, 대시보드, 간트차트 프로젝트 보조 기능
+
+## 주요 기능
+
+### 관리
+
+- 회사별 사용자 가입승인
+- 사용자 등록 및 계정 상태 관리
+- 그룹 관리
+- 역할 및 권한 관리
+- 코드값 및 서비스 설정 관리
+
+### 프로젝트
+
+- 프로젝트 생성 및 관리
+- 프로젝트 구성원 등록 및 관리
+- 프로젝트별 모듈 설정
+- 버전 및 마일스톤 관리
+- 로드맵 관리
+
+### 일감 / 테스트
+
+- 일감 등록, 조회, 수정, 삭제
+- 일감 댓글 및 작업내역 관리
+- 일감 유형, 우선순위, 상태 관리
+- 테스트 케이스 관리
+- 요구사항 커버리지 확인
+
+### 일정 / 현황
+
+- 통합 캘린더 및 프로젝트 캘린더
+- 작업 시간 등록 및 소요시간 관리
+- 간트차트
+- 칸반보드
+- 프로젝트 진행 현황 확인
+
+### 협업 / 산출물
+
+- 위키 등록 및 관리
+- 게시판
+- 파일 업로드 및 다운로드
+- 다운로드 이력 조회
+- 알림 및 마이페이지
+
+### 저장소
+
+- GitHub 저장소 등록 및 관리
+- 저장소 파일트리 및 파일 내용 조회
+- 커밋 내역 조회
+- 커밋 상세 및 변경 내역 확인
+- 커밋 메시지 기반 일감 연결
+
 
 ## 🖥 메인 화면 및 아키텍처 (Overview & Architecture)
 
@@ -87,19 +142,33 @@
 
 <br>
 
-## 🛠 Tech Stack (기술 스택)
-
-### Frontend
-- **Thymeleaf**: 서버 사이드 템플릿 렌더링
-- **Vanilla JS**: Fetch API를 활용한 비동기 통신 및 동적 UI 제어
-- **UI/UX**: Custom Toast 메시지 구현
+## 기술 스택
 
 ### Backend
-- **Framework**: Spring Boot / Spring MVC
-- **Security**: Spring Security (인증 및 권한 처리)
-- **Database**: Oracle DB (PL/SQL 프로시저 활용)
-- **ORM / SQL Mapper**: JPA, MyBatis
-- **Storage**: AWS S3 연동 (파일 업로드)
+
+- Java 21
+- Spring Boot 3.5.16
+- Spring MVC
+- Spring Security
+- MyBatis
+- Oracle Database
+- Jasypt
+
+### Frontend
+
+- Thymeleaf
+- JavaScript
+- HTML5
+- CSS3
+
+### External / Infra
+
+- GitHub REST API
+- AWS S3
+- AWS EC2
+- Docker
+- Jenkins
+- GitHub Actions
 
 <br>
 
@@ -149,7 +218,31 @@
 | **Cloud & Storage**| ![AWS S3](https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white) |
 | **Collaboration** | ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white) ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white) |
 
+실행 방법
 
+1. 환경 변수 설정
+실행 환경에 맞게 필요한 값을 설정합니다.
+JASYPT_PASSWORD
+GITHUB_API_TOKEN
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+
+2. 애플리케이션 실행
+./mvnw spring-boot:run
+Windows 환경에서는 다음 명령을 사용할 수 있습니다.
+mvnw.cmd spring-boot:run
+
+3. 빌드
+./mvnw clean package
+배포 구조
+WEPLE은 GitHub, Jenkins, Docker, DockerHub, AWS EC2를 기반으로 배포 환경을 구성했습니다.
+GitHub push
+→ GitHub Actions
+→ Jenkins 원격 빌드 실행
+→ Maven Build
+→ Docker Image Build
+→ DockerHub Push
+→ 운영 EC2에서 Docker Image Pull & Run
 
 ## 🚀 Trouble Shooting (문제 해결)
 <!-- 해결했던 이슈 작성 -->
