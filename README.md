@@ -78,7 +78,7 @@
 
 ### 2. 데이터베이스 구성도 (ERD)
 <!-- 데이터베이스 ERD 이미지 추가 (예: 일감, 이력, 댓글, 첨부파일 테이블 관계 등) -->
-<img width="1060" height="629" alt="image" src="https://github.com/user-attachments/assets/953caaa1-de90-4f31-a5b8-70785b6ae38d" />
+
 
 
 ### 3. 시스템 흐름도 (System Flowchart)
