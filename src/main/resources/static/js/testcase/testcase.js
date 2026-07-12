@@ -126,14 +126,7 @@ function openTcDeleteModal(btn) {
     const testId = btn.getAttribute('data-test-id');
     const testName = btn.getAttribute('data-test-name');
     const projectId = btn.getAttribute('data-project-id');
-
     const dialog = document.getElementById('tcDeleteDialog');
-    
-    // 만약 HTML에서 모달 코드를 못 찾으면 경고창 띄우기 (먹통 방지)
-    if (!dialog) {
-        alert('모달 창 코드를 찾을 수 없습니다. HTML 하단에 <dialog> 태그가 있는지 확인해주세요.');
-        return;
-    }
 
     // 텍스트 가이드 및 폼 세팅
     document.getElementById('tcDeleteName').textContent = testName;
