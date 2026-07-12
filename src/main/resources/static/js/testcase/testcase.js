@@ -157,7 +157,7 @@ function openTcDeleteModal(btn) {
         }
     };
 
-    // 모달 띄우기!
+    // 모달 띄우기
     dialog.showModal();
 }
 
