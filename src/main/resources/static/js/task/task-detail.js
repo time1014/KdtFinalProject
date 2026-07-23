@@ -181,7 +181,7 @@ function showConfirm(title, desc) {
 
 
 
-// 💡 새롭게 추가하는 부분 새로고침 함수
+// 새롭게 추가하는 부분 새로고침 함수
 function reloadCommentList() {
 	const projectId = document.getElementById('currentProjectId').value;
 	const currentTaskId = document.getElementById('currentTaskId').value; // 실시간으로 가져오기
@@ -196,7 +196,7 @@ function reloadCommentList() {
 		.catch(err => console.error("댓글 목록 갱신 실패:", err));
 }
 
-// 1. 댓글 등록
+//  댓글 등록
 function submitComment(parentCommentId) {
 	let contentId = parentCommentId ? 'reply-content-' + parentCommentId : 'mainCommentContent';
 	let contentElement = document.getElementById(contentId);
@@ -235,7 +235,7 @@ function submitComment(parentCommentId) {
 		});
 }
 
-// 2. 댓글 수정
+//  댓글 수정
 function updateComment(commentId) {
 	const newContent = document.getElementById('edit-content-' + commentId).value;
 	if (!newContent.trim()) {
@@ -261,7 +261,7 @@ function updateComment(commentId) {
 		});
 }
 
-// 3. 댓글 삭제
+//  댓글 삭제
 function deleteComment(commentId) {
 	showConfirm('댓글 삭제', '정말 이 댓글을 삭제하시겠습니까?').then((isConfirmed) => {
 		if (isConfirmed) {
@@ -284,7 +284,7 @@ function deleteComment(commentId) {
 }
 
 
-// 3. 댓글 수정 폼 열기/닫기 토글 
+//  댓글 수정 폼 열기/닫기 토글 
 function toggleEditForm(commentId) {
 	const textElement = document.getElementById('comment-text-' + commentId);
 	const formElement = document.getElementById('edit-form-' + commentId);
